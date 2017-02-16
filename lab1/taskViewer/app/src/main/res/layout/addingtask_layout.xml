@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:text="Add"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:id="@+id/addButton"
+        android:layout_marginBottom="71dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="13dp"
+        android:onClick="goToPrevActivity" />
+
+    <EditText
+        android:layout_width="177dp"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:id="@+id/textField_taskName"
+        android:layout_alignTop="@+id/textView1"
+        android:layout_alignEnd="@+id/addButton" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:layout_marginTop="40dp"
+        android:id="@+id/textField_description"
+        android:layout_below="@+id/textField_taskName"
+        android:layout_alignEnd="@+id/textField_taskName" />
+
+    <TextView
+        android:text="description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/textField_description"
+        android:layout_alignParentStart="true"
+        android:id="@+id/textView2" />
+
+    <TextView
+        android:text="task name"
+        android:layout_width="83dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView1"
+        android:layout_marginTop="89dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="priority"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textField_description"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="43dp"
+        android:id="@+id/textView4" />
+
+    <TextView
+        android:text="deadline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView4"
+        android:layout_marginTop="30dp"
+        android:id="@+id/textView5" />
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignTop="@+id/textView4"
+        android:layout_toEndOf="@+id/textView1"
+        android:layout_marginStart="30dp"
+        android:id="@+id/priorityRadioGroup">
+
+        <RadioButton
+            android:text="high"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/radioButtonHigh"
+            android:layout_weight="1"
+            android:layout_above="@+id/textView1"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="13dp" />
+
+        <RadioButton
+            android:text="medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/radioButtonMedium"
+            android:layout_weight="1"
+            android:layout_alignBaseline="@+id/radioButtonHigh"
+            android:layout_alignBottom="@+id/radioButtonHigh"
+            android:layout_alignStart="@+id/textField_taskName" />
+
+        <RadioButton
+            android:text="low"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/radioButtonLow"
+            android:layout_weight="1"
+            android:layout_alignTop="@+id/textView4"
+            android:layout_alignEnd="@+id/textField_description"
+            android:layout_marginEnd="17dp" />
+
+    </RadioGroup>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:layout_below="@+id/priorityRadioGroup"
+        android:layout_alignStart="@+id/priorityRadioGroup"
+        android:id="@+id/textField_date" />
+
+</RelativeLayout>
