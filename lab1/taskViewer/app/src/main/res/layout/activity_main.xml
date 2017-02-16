@@ -10,7 +10,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.mytaskviewer.taskviewer.MainActivity">
 
-
     <Button
         android:text="Add task"
         android:layout_width="wrap_content"
@@ -25,7 +24,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/addButton"
-        android:layout_alignStart="@+id/addButton"
-        android:layout_marginTop="37dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="127dp"
         android:id="@+id/taskListView" />
+
+
 </RelativeLayout>

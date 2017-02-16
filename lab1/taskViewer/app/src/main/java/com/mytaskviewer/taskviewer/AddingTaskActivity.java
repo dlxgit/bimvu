@@ -51,12 +51,27 @@ public class AddingTaskActivity extends Activity {
 
 
     public void goToPrevActivity(View v) {
-        Intent intent = new Intent(this, MainActivity.class);
-        //this.finish();
-        intent.putExtra("name", name.getText());
-        intent.putExtra("description", name.getText());
-        intent.putExtra("date", name.getText());
-        intent.putExtra("priority", getPriority());
+        Intent intent = new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        intent.putExtra("header", name.getText().toString());
+        intent.putExtra("description", description.getText().toString());
+        intent.putExtra("date", date.getText().toString());
+        intent.putExtra("priority", String.valueOf(getPriority()));
+        setResult(RESULT_OK, intent);
+        finish();
         startActivity(intent);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+
     }
 }
