@@ -31,12 +31,12 @@ public class TaskItem {
 
     public TaskItem(Intent intent){
         if (intent.getExtras().containsKey("header")) {
-            //boolean isNew = extras.getBoolean("isNewItem", false);
             this.header = intent.getStringExtra("header");
             this.description = intent.getStringExtra("description");
-            this.priority = intent.getIntExtra("priority", 0);
+            this.priority = Integer.parseInt(intent.getStringExtra("priority"));
             this.date = intent.getStringExtra("date");
         }
+        //TODO: else null? throw?
     }
 
     public boolean isStatus() {

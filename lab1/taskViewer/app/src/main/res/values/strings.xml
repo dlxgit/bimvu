@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">taskViewer</string>
+
+    <!-- TODO:заменить саму кнопку на картинку (плюсик), затем убрать это  -->
+    <string name="main_activity_add_button_title">Add task</string>
+
+    <string name="adding_task_activity_task_name_title">task name</string>
+    <string name="adding_task_activity_description_title">description</string>
+    <string name="adding_task_activity_priority_title">priority</string>
+    <string name="adding_task_activity_deadline_title">deadline</string>
+    <string name="adding_task_activity_add_button_title">ADD</string>
+    <string name="adding_task_activity_radio_low">low</string>
+    <string name="adding_task_activity_radio_medium">medium</string>
+    <string name="adding_task_activity_radio_high">high</string>
+
+
+    <string name="task_item_context_menu_edit_title">Edit</string>
+    <string name="task_item_context_menu_remove_title">Remove</string>
+
+
 </resources>

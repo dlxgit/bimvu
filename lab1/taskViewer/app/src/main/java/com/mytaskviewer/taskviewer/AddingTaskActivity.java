@@ -18,6 +18,7 @@ public class AddingTaskActivity extends Activity {
     EditText date;
     RadioGroup priorityRadioGroup;
 
+    int priority;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,51 +28,47 @@ public class AddingTaskActivity extends Activity {
         description = (EditText) findViewById(R.id.textField_description);
         date = (EditText) findViewById(R.id.textField_date);
         priorityRadioGroup = (RadioGroup) findViewById(R.id.priorityRadioGroup);
+
+        priorityRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            public void  onCheckedChanged(RadioGroup group, int checkedId) {
+                switch(checkedId){
+                    case R.id.radioButtonLow:
+                        priority = 0;
+                        break;
+                    case R.id.radioButtonMedium:
+                        priority = 1;
+                        break;
+                    case R.id.radioButtonHigh:
+                        priority = 2;
+                        break;
+                }
+            }
+        });
     }
 
     private int getPriority() {
         return priorityRadioGroup.getCheckedRadioButtonId();
-//        priorityRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-//        {
-//            public void onCheckedChanged(RadioGroup group, int checkedId) {
-//                switch(checkedId){
-//                    case R.id.radioButtonLow:
-//                        return 0;
-//                        break;
-//                    case R.id.radioButtonMedium:
-//                        // do operations specific to this selection
-//                        break;
-//                    case R.id.radioButtonHigh:
-//                        // do operations specific to this selection
-//                        break;
-//                }
-//            }
-//        });
     }
 
-
     public void goToPrevActivity(View v) {
-        Intent intent = new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
+        //Intent intent = new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+ //       Intent intent = getIntent();
+//
+        Intent intent = new Intent();
         intent.putExtra("header", name.getText().toString());
         intent.putExtra("description", description.getText().toString());
         intent.putExtra("date", date.getText().toString());
-        intent.putExtra("priority", String.valueOf(getPriority()));
+        intent.putExtra("priority", String.valueOf(priority));
+
         setResult(RESULT_OK, intent);
+
         finish();
-        startActivity(intent);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
+        //startActivity(intent);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-
-
     }
 }

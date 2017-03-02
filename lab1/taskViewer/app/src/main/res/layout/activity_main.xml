@@ -11,7 +11,7 @@
     tools:context="com.mytaskviewer.taskviewer.MainActivity">
 
     <Button
-        android:text="Add task"
+        android:text="@string/main_activity_add_button_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"

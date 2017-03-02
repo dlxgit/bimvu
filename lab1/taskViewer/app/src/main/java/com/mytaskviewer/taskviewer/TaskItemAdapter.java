@@ -45,7 +45,6 @@ public class TaskItemAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
-        TaskItemHolder holder = null;
 
         if(view == null)
         {

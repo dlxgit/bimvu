@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView listView;
 
-   // private BoxAdapter adapter;
     private TaskItem item;
     ArrayList<TaskItem> items;
 
@@ -31,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
     String description;
     int priority;
     String date;
-
     TaskItemAdapter adapter;
 
     @Override
@@ -39,30 +37,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-//        listView = (ListView) findViewById(R.id.taskListView);
-//
-//
-//
-//        item = new TaskItem(extras.getString("name"), extras.getString("description"), extras.getInt("priority"), extras.getString("date"));
-//        header = extras.getString("name");
-//        description = extras.getString("description");
-//        priority = extras.getInt("priority");
-//        date = extras.getString("date");
-
-
-        //listView.getItems
-
-        //listView.addFooterView();
-
-        if(items == null) {
-            items = new ArrayList<>();
-            items.add(new TaskItem("asd", "asdd", 1, "1.1.1"));
-            adapter = new TaskItemAdapter(this, items);
-            listView = (ListView) findViewById(R.id.taskListView);
-            listView.setAdapter(adapter);
-            items.add(new TaskItem("asdd", "asddd", 1, "1.1.1"));
+        //TODO: this is KOSTIL
+        items = DataManager.loadData(getBaseContext());
+        if(items.size() > 0) {
+            items.remove(items.size() - 1);
         }
+
+        adapter = new TaskItemAdapter(this, items);
+        listView = (ListView) findViewById(R.id.taskListView);
+        listView.setAdapter(adapter);
+
+//        if(items == null) {
+//            items = DataManager.loadData(getBaseContext());
+//            //items = new ArrayList<>();
+//            adapter = new TaskItemAdapter(this, items);
+//            listView = (ListView) findViewById(R.id.taskListView);
+//            listView.setAdapter(adapter);
+////adapter.notifyDataSetChanged();
+//            items.add(new TaskItem("asd", "asdd", 1, "1.1.1"));
+//
+//
+//            items.add(new TaskItem("asdd", "asddd", 1, "1.1.1"));
+//            //onDestroy();
+//        }
 
         //TODO: как лучше проверять на реально пришедший интент(непустой бундл)?  UPD: fix с onNewIntent()
         Intent intent = getIntent();
@@ -70,29 +67,35 @@ public class MainActivity extends AppCompatActivity {
             Bundle bundle = intent.getExtras();
             items.add(new TaskItem(intent));
         }
-        //intent.
-
-
-//        Bundle extras = getIntent().getExtras();
-//        item = new TaskItem(extras.getString("name"), extras.getString("description"), extras.getInt("priority"), extras.getString("date"));
-//        header = extras.getString("name");
-//        description = extras.getString("description");
-//        priority = extras.getInt("priority");
-//        date = extras.getString("date");
-//
-//        items.add(item);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        //items.add(new TaskItem(intent));
 
     }
 
     public void goToNewActivity(View v) {
-        Intent intent = new Intent(this, AddingTaskActivity.class);
-        startActivity(intent);
+        startActivityForResult(new Intent(this, AddingTaskActivity.class), 1);
+    }
+
+    @Override
+    protected void onStop() {
+        DataManager.saveData(items, getBaseContext());
+        //onCreate(this.getIntent().getExtras());
+        super.onStop();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        System.out.println("OnActivityResult!");
+        if(data.getExtras() != null) {
+            Bundle bundle = data.getExtras();
+            items.add(new TaskItem(data));
+            adapter.notifyDataSetChanged();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.out.println("ImDestroying!");
+        //DataManager.saveData(items, getBaseContext());
+        super.onDestroy();
     }
 }
