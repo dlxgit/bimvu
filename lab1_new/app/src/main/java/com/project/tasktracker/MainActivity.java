@@ -29,10 +29,11 @@ public class MainActivity extends AppCompatActivity {
 
         onItemEditCallback = new OnItemEditCallback() {
             @Override
-            public void onItemEdit(TaskItem item) {
+            public void onItemEdit(int index) {
                 Intent intent = new Intent(MainActivity.this, AddingTaskActivity.class);
-                intent.putExtras(item.toBundle());
-                startActivityForResult(intent, 1);
+                intent.putExtras(adapter.getItem(index).toBundle());
+                intent.putExtra("oldItemId", index);
+                startActivityForResult(intent, 2);
             }
         };
 
@@ -57,7 +58,13 @@ public class MainActivity extends AppCompatActivity {
         if(data != null && data.getExtras() != null) {
             Bundle bundle = data.getExtras();
             TaskItem item = new TaskItem(bundle);
-            adapter.addItem(item);
+            if(resultCode == 1) {
+                adapter.addItem(item);
+            }
+            else if (resultCode == 2) {
+                adapter.onReplace(bundle.getInt("oldItemId"), item);
+            }
+
             //adapter.add
 //            items.add(new TaskItem(data));
 //            adapter.notifyDataSetChanged();

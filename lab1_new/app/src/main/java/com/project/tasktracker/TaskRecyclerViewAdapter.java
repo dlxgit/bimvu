@@ -57,6 +57,10 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         notifyItemInserted(m_items.indexOf(item));
     }
 
+    public TaskItem getItem(int id){
+        return m_items.get(id);
+    }
+
     private void sortData() {
 
     }
@@ -68,10 +72,21 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
     public void onMenuItemClick(MenuItem menuItem, TaskItem taskItem) {
         if(menuItem.getTitle().equals("Edit")) {
             //adapter.on
-            onItemEditCallback.onItemEdit(taskItem);
+            onItemEditCallback.onItemEdit(m_items.indexOf(taskItem));
         }
         else if (menuItem.getTitle().equals("Delete")) {
             onDeleteTask(taskItem);
+        }
+    }
+
+    public void onReplace(int oldItemId, TaskItem newItem) {
+        if(m_items.isEmpty()) {
+            m_items.add(newItem);
+        }
+        else {
+            m_items.remove(oldItemId);
+            m_items.add(oldItemId, newItem);
+            notifyItemRangeChanged(oldItemId, oldItemId + 1);
         }
     }
 

@@ -26,6 +26,9 @@ public class AddingTaskActivity extends Activity {
 
     SingleDateAndTimePickerDialog dlg;
 
+    //(cause can come from editing or creating)
+    boolean isCreating = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +109,8 @@ public class AddingTaskActivity extends Activity {
 
                 Intent intent = new Intent();
                 intent.putExtras(taskItem.toBundle());
-                setResult(1, intent);
+
+                setResult(isCreating ? 1 : 2, intent);
                 finish();
             }
         });
@@ -143,6 +147,8 @@ public class AddingTaskActivity extends Activity {
         if(bundle == null) {
             return;
         }
+
+        isCreating = false;
 
         nameEditText.setText(bundle.getString("header"));
         descriptionEditText.setText(bundle.getString("descriptionEditText"));

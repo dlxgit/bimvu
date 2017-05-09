@@ -3,5 +3,5 @@ package com.project.tasktracker;
 
 
 public interface OnItemEditCallback {
-    void onItemEdit(TaskItem item);
+    void onItemEdit(int index);
 }
