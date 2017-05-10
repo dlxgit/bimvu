@@ -12,9 +12,9 @@ import java.util.Collections;
 
 
 public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerViewHolder> {
-    LayoutInflater layoutInflater;
-    ArrayList<TaskItem> m_items;
-    OnItemEditCallback onItemEditCallback;
+    private LayoutInflater layoutInflater;
+    private ArrayList<TaskItem> m_items;
+    private OnItemEditCallback onItemEditCallback;
 
     public TaskRecyclerViewAdapter(Activity activity, OnItemEditCallback onItemEditCallback) {
         super();
@@ -33,23 +33,13 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public TaskRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_item, parent, false);
-
         return new TaskRecyclerViewHolder(view, this);
     }
 
     @Override
     public void onBindViewHolder(TaskRecyclerViewHolder holder, final int position) {
         holder.bindData(m_items.get(position), position);
-//            holder.completeCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                m_items.get(position).setFinished(isChecked);
-//                sortItems();
-//                notifyDataSetChanged();
-//            }
-//        });
     }
 
     @Override

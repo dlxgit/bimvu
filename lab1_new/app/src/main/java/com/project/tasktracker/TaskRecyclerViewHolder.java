@@ -1,9 +1,6 @@
 package com.project.tasktracker;
 
-import android.app.Activity;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.v7.view.menu.MenuItemImpl;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -12,25 +9,17 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 
 public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
-    View root;
-    TextView name;
-    TextView description;
-    CheckBox completeCheckBox;
-    TextView deadline;
+    private View root;
+    private TextView name;
+    private TextView description;
+    private CheckBox completeCheckBox;
+    private TextView deadline;
 
-    View priorityView;
-
-    //int priority;
-    //int position;
-    TaskItem taskItem;
-    TaskRecyclerViewAdapter adapter;
+    private View priorityView;
+    private TaskItem taskItem;
+    private TaskRecyclerViewAdapter adapter;
 
 
     public TaskRecyclerViewHolder(View root, final TaskRecyclerViewAdapter adapter) {
@@ -43,16 +32,20 @@ public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements V
         priorityView = (View) root.findViewById(R.id.task_item_priority_colored_view);
         deadline = (TextView) root.findViewById(R.id.task_item_date);
 
-
-
         root.setOnCreateContextMenuListener(this);
         root.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 completeCheckBox.setChecked(!completeCheckBox.isChecked());
+
             }
         });
-        //root.setMen
+        completeCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                taskItem.setFinished(isChecked);
+            }
+        });
     }
 
     public void bindData(TaskItem taskItem, int position) {
@@ -61,11 +54,7 @@ public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements V
         description.setText(taskItem.getDescription());
         completeCheckBox.setChecked(taskItem.isFinished());
         deadline.setText(taskItem.getStringDate());
-
         changeColorDependingOnItemPriority(taskItem.getPriority());
-
-        //this.position = position;
-        //root.setOnCreateContextMenuListener(this);
     }
 
     public TaskItem getData(){

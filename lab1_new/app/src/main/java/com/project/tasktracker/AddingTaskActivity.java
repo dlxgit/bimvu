@@ -19,16 +19,14 @@ import java.util.Date;
 
 public class AddingTaskActivity extends Activity {
 
-    EditText nameEditText;
-    EditText descriptionEditText;
-    EditText dateEditText;
-    RadioGroup priorityRadioGroup;
-    int priority;
-    CheckBox completionCheckBox;
-
-    SingleDateAndTimePickerDialog dlg;
-
-    boolean isCreating = true; //to know where we came from
+    private EditText nameEditText;
+    private EditText descriptionEditText;
+    private EditText dateEditText;
+    private RadioGroup priorityRadioGroup;
+    private int priority;
+    private CheckBox completionCheckBox;
+    private SingleDateAndTimePickerDialog dlg;
+    private boolean isCreating = true; //to know where we came from
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +36,7 @@ public class AddingTaskActivity extends Activity {
         descriptionEditText = (EditText) findViewById(R.id.textField_description);
         dateEditText = (EditText) findViewById(R.id.textField_date);
         completionCheckBox = (CheckBox) findViewById(R.id.completion_checkbox);
-
         priorityRadioGroup = (RadioGroup) findViewById(R.id.priorityRadioGroup);
-
         priorityRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
             public void  onCheckedChanged(RadioGroup group, int checkedId) {
@@ -73,18 +69,12 @@ public class AddingTaskActivity extends Activity {
                 dlg.display();
             }
         });
-
         initializeViewsFromBundle(getIntent().getExtras());
-
         Button addButton = (Button) findViewById(R.id.adding_task_activity_addbutton);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TaskItem taskItem = new TaskItem();
-                taskItem.setName(nameEditText.getText().toString());
-                taskItem.setDescription(descriptionEditText.getText().toString());
-                taskItem.setFinished(completionCheckBox.isChecked());
-                taskItem.setPriority(priority);
+                TaskItem taskItem = initializeTaskItemFromInput();
 
                 if(dateEditText.getText().length() > 0)
                 {
@@ -114,7 +104,6 @@ public class AddingTaskActivity extends Activity {
 
                 Intent intent = new Intent();
                 intent.putExtras(taskItem.toBundle());
-
                 setResult(isCreating ? 1 : 2, intent);
                 finish();
             }
@@ -156,11 +145,6 @@ public class AddingTaskActivity extends Activity {
 
         isCreating = false;
 
-//        nameEditText.setText(bundle.getString("header"));
-//        descriptionEditText.setText(bundle.getString("descriptionEditText"));
-//        priorityRadioGroup.check(getRadioButton(bundle.getInt("priority")).getId());
-//        completionCheckBox.setChecked(bundle.getBoolean("isFinished"));
-//        dateEditText.setText(new Date(bundle.getLong("deadline")).toString());
         nameEditText.setText(item.getName());
         descriptionEditText.setText(item.getDescription());
         priorityRadioGroup.check(getRadioButton(item.priority).getId());
@@ -177,5 +161,14 @@ public class AddingTaskActivity extends Activity {
             case 2:
                 return (RadioButton) findViewById(R.id.radioButtonHigh);
         }
+    }
+
+    private TaskItem initializeTaskItemFromInput() {
+        TaskItem taskItem = new TaskItem();
+        taskItem.setName(nameEditText.getText().toString());
+        taskItem.setDescription(descriptionEditText.getText().toString());
+        taskItem.setFinished(completionCheckBox.isChecked());
+        taskItem.setPriority(priority);
+        return taskItem;
     }
 }

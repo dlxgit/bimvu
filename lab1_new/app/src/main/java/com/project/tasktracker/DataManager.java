@@ -2,14 +2,11 @@ package com.project.tasktracker;
 
 
 import android.content.Context;
-import android.net.Uri;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -59,5 +56,4 @@ public class  DataManager {
             e.printStackTrace();
         }
     }
-
 }
