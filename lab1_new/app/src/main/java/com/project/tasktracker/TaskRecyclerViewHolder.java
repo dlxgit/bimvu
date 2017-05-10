@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 
 public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
-    private View root;
+    private final View root;
     private TextView name;
     private TextView description;
     private CheckBox completeCheckBox;
@@ -22,7 +22,7 @@ public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements V
     private TaskRecyclerViewAdapter adapter;
 
 
-    public TaskRecyclerViewHolder(View root, final TaskRecyclerViewAdapter adapter) {
+    public TaskRecyclerViewHolder(final View root, final TaskRecyclerViewAdapter adapter) {
         super(root);
         this.root = root;
         this.adapter = adapter;
@@ -44,17 +44,31 @@ public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements V
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 taskItem.setFinished(isChecked);
+                root.setBackgroundColor(isChecked ? Color.parseColor("#e7e7e4") : 0);
+                if(isChecked) {
+                    priorityView.setBackgroundColor(0);
+                }
+                else {
+                    changeColorDependingOnItemPriority(taskItem.getPriority());
+                }
             }
         });
     }
 
-    public void bindData(TaskItem taskItem, int position) {
+    public void bindData(TaskItem taskItem) {
         this.taskItem = taskItem;
         name.setText(taskItem.getName());
         description.setText(taskItem.getDescription());
         completeCheckBox.setChecked(taskItem.isFinished());
         deadline.setText(taskItem.getStringDate());
         changeColorDependingOnItemPriority(taskItem.getPriority());
+        root.setBackgroundColor(taskItem.isFinished() ? Color.parseColor("#e7e7e4") : 0);
+        if(taskItem.isFinished()) {
+            priorityView.setBackgroundColor(0);
+        }
+        else {
+            changeColorDependingOnItemPriority(taskItem.getPriority());
+        }
     }
 
     public TaskItem getData(){
@@ -71,7 +85,6 @@ public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements V
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         adapter.onMenuItemClick(item, taskItem);
-
         return false;
     }
 

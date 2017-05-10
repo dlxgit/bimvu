@@ -39,7 +39,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
 
     @Override
     public void onBindViewHolder(TaskRecyclerViewHolder holder, final int position) {
-        holder.bindData(m_items.get(position), position);
+        holder.bindData(m_items.get(position));
     }
 
     @Override
@@ -52,6 +52,7 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         int position = m_items.indexOf(taskItem);
         m_items.remove(position);
         notifyItemRemoved(position);
+        MyApplication.getInstance().saveData();
     }
 
     public void addItem(TaskItem item) {
@@ -80,10 +81,11 @@ public class TaskRecyclerViewAdapter extends RecyclerView.Adapter<TaskRecyclerVi
         }
         else {
             m_items.remove(oldItemId);
-            m_items.add(oldItemId, newItem);
+            m_items.add(newItem);
             sortItems();
         }
-        notifyItemInserted(m_items.indexOf(newItem));
+        notifyDataSetChanged();
+        MyApplication.getInstance().saveData();
     }
 
     public void sortItems() {

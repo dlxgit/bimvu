@@ -14,11 +14,11 @@ import java.util.Locale;
 public class TaskItem implements Comparable<TaskItem> {
     public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
-    String name;
-    String description;
-    boolean isFinished;
-    int priority;
-    Date deadline;
+    private String name;
+    private String description;
+    private boolean isFinished;
+    private int priority;
+    private Date deadline;
 
     public TaskItem() {
         this.name = new String();
@@ -53,13 +53,12 @@ public class TaskItem implements Comparable<TaskItem> {
         if (isFinished() != o.isFinished()) {
             return isFinished() ? 1 : -1;
         }
-
-        int dateComparsionResult = getDeadline().compareTo(o.getDeadline());
-        if (dateComparsionResult != 0) {
-            return dateComparsionResult;
+        int priorityComparsionResult = Integer.compare(o.getPriority(), getPriority());
+        if(priorityComparsionResult != 0) {
+            return priorityComparsionResult;
         }
-
-        return Integer.compare(getPriority(), o.getPriority());
+        int dateComparsionResult = getDeadline().compareTo(o.getDeadline());
+        return dateComparsionResult;
     }
 
     public String getName() {

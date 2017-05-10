@@ -23,7 +23,7 @@ public class AddingTaskActivity extends Activity {
     private EditText descriptionEditText;
     private EditText dateEditText;
     private RadioGroup priorityRadioGroup;
-    private int priority;
+    private int priority = 1;
     private CheckBox completionCheckBox;
     private SingleDateAndTimePickerDialog dlg;
     private boolean isCreating = true; //to know where we came from
@@ -102,28 +102,10 @@ public class AddingTaskActivity extends Activity {
                     return;
                 }
 
-                Intent intent = new Intent();
+                Intent intent = getIntent();
                 intent.putExtras(taskItem.toBundle());
                 setResult(isCreating ? 1 : 2, intent);
                 finish();
-            }
-        });
-
-
-        priorityRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-        {
-            public void  onCheckedChanged(RadioGroup group, int checkedId) {
-                switch(checkedId){
-                    case R.id.radioButtonLow:
-                        priority = 0;
-                        break;
-                    case R.id.radioButtonMedium:
-                        priority = 1;
-                        break;
-                    case R.id.radioButtonHigh:
-                        priority = 2;
-                        break;
-                }
             }
         });
     }
@@ -147,7 +129,7 @@ public class AddingTaskActivity extends Activity {
 
         nameEditText.setText(item.getName());
         descriptionEditText.setText(item.getDescription());
-        priorityRadioGroup.check(getRadioButton(item.priority).getId());
+        priorityRadioGroup.check(getRadioButton(item.getPriority()).getId());
         completionCheckBox.setChecked(item.isFinished());
         dateEditText.setText(item.getStringDate());
     }

@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final SwipeRefreshLayout swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -34,8 +36,6 @@ public class MainActivity extends AppCompatActivity {
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -50,10 +50,8 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-
-        recyclerView = (RecyclerView) findViewById(R.id.tasksRecyclerView);
         adapter = new TaskRecyclerViewAdapter(this, onItemEditCallback);
-        adapter.setItems(DataManager.loadData(this));
+        adapter.setItems(MyApplication.getInstance().getData());
         recyclerView.setAdapter(adapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -75,12 +73,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        adapter.setItems(MyApplication.getInstance().getData());
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        DataManager.saveData(adapter.getItems(), this);
+        MyApplication.getInstance().saveData();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MyApplication.getInstance().saveData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MyApplication.getInstance().reloadData();
     }
 
     @Override
@@ -94,7 +105,8 @@ public class MainActivity extends AppCompatActivity {
                 adapter.addItem(item);
             }
             else if (resultCode == 2) {
-                adapter.onReplace(bundle.getInt("oldItemId"), item);
+                int i = data.getIntExtra("oldItemId", 1);
+                adapter.onReplace(i, item);
             }
         }
     }
