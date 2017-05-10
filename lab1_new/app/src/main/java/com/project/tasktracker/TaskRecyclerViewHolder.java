@@ -9,6 +9,7 @@ import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import java.util.Collection;
@@ -22,6 +23,7 @@ public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements V
     TextView name;
     TextView description;
     CheckBox completeCheckBox;
+    TextView deadline;
 
     View priorityView;
 
@@ -31,15 +33,25 @@ public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements V
     TaskRecyclerViewAdapter adapter;
 
 
-    public TaskRecyclerViewHolder(View root, TaskRecyclerViewAdapter adapter) {
+    public TaskRecyclerViewHolder(View root, final TaskRecyclerViewAdapter adapter) {
         super(root);
         this.root = root;
         this.adapter = adapter;
-        name = (TextView) root.findViewById(R.id.textView_name);
-        description = (TextView) root.findViewById(R.id.textView_description);
-        completeCheckBox = (CheckBox) root.findViewById(R.id.checkBox_status);
+        name = (TextView) root.findViewById(R.id.task_item_name);
+        description = (TextView) root.findViewById(R.id.task_item_description);
+        completeCheckBox = (CheckBox) root.findViewById(R.id.task_item_checkbox);
         priorityView = (View) root.findViewById(R.id.task_item_priority_colored_view);
+        deadline = (TextView) root.findViewById(R.id.task_item_date);
+
+
+
         root.setOnCreateContextMenuListener(this);
+        root.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                completeCheckBox.setChecked(!completeCheckBox.isChecked());
+            }
+        });
         //root.setMen
     }
 
@@ -48,6 +60,8 @@ public class TaskRecyclerViewHolder extends RecyclerView.ViewHolder implements V
         name.setText(taskItem.getName());
         description.setText(taskItem.getDescription());
         completeCheckBox.setChecked(taskItem.isFinished());
+        deadline.setText(taskItem.getStringDate());
+
         changeColorDependingOnItemPriority(taskItem.getPriority());
 
         //this.position = position;

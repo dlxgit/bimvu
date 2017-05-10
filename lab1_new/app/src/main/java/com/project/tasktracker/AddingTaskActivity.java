@@ -13,6 +13,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePickerDialog;
+
+import java.text.ParseException;
 import java.util.Date;
 
 public class AddingTaskActivity extends Activity {
@@ -26,8 +28,7 @@ public class AddingTaskActivity extends Activity {
 
     SingleDateAndTimePickerDialog dlg;
 
-    //(cause can come from editing or creating)
-    boolean isCreating = true;
+    boolean isCreating = true; //to know where we came from
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +62,7 @@ public class AddingTaskActivity extends Activity {
                 .listener(new SingleDateAndTimePickerDialog.Listener() {
                     @Override
                     public void onDateSelected(Date date) {
-                        dateEditText.setText(date.toString());
+                        dateEditText.setText(TaskItem.DATE_FORMAT.format(date).toString());
                     }
                 }).build();
 
@@ -75,7 +76,7 @@ public class AddingTaskActivity extends Activity {
 
         initializeViewsFromBundle(getIntent().getExtras());
 
-        Button addButton = (Button) findViewById(R.id.addButton);
+        Button addButton = (Button) findViewById(R.id.adding_task_activity_addbutton);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,7 +88,11 @@ public class AddingTaskActivity extends Activity {
 
                 if(dateEditText.getText().length() > 0)
                 {
-                    taskItem.setDeadline(new Date(dateEditText.getText().toString()));
+                    try {
+                        taskItem.setDeadline(taskItem.DATE_FORMAT.parse(dateEditText.getText().toString()));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 if(taskItem.getName().isEmpty() || taskItem.getDescription().isEmpty() || taskItem.getDeadline() == null) {
@@ -147,14 +152,20 @@ public class AddingTaskActivity extends Activity {
         if(bundle == null) {
             return;
         }
+        TaskItem item = new TaskItem(bundle);
 
         isCreating = false;
 
-        nameEditText.setText(bundle.getString("header"));
-        descriptionEditText.setText(bundle.getString("descriptionEditText"));
-        priorityRadioGroup.check(getRadioButton(bundle.getInt("priority")).getId());
-        completionCheckBox.setChecked(bundle.getBoolean("isFinished"));
-        dateEditText.setText(new Date(bundle.getLong("deadline")).toString());
+//        nameEditText.setText(bundle.getString("header"));
+//        descriptionEditText.setText(bundle.getString("descriptionEditText"));
+//        priorityRadioGroup.check(getRadioButton(bundle.getInt("priority")).getId());
+//        completionCheckBox.setChecked(bundle.getBoolean("isFinished"));
+//        dateEditText.setText(new Date(bundle.getLong("deadline")).toString());
+        nameEditText.setText(item.getName());
+        descriptionEditText.setText(item.getDescription());
+        priorityRadioGroup.check(getRadioButton(item.priority).getId());
+        completionCheckBox.setChecked(item.isFinished());
+        dateEditText.setText(item.getStringDate());
     }
 
     private RadioButton getRadioButton(int index) {

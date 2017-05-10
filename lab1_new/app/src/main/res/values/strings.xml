@@ -14,5 +14,7 @@
 
     <string name="task_item_context_menu_edit_title">Edit</string>
     <string name="task_item_context_menu_remove_title">Remove</string>
+    <string name="ok_button_text">OK</string>
+    <string name="adding_task_activity_finished">finished</string>
 
 </resources>

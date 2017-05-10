@@ -3,7 +3,6 @@ package com.project.tasktracker;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -40,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = (RecyclerView) findViewById(R.id.tasksRecyclerView);
         adapter = new TaskRecyclerViewAdapter(this, onItemEditCallback);
+        adapter.setItems(DataManager.loadData(this));
         recyclerView.setAdapter(adapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -49,6 +49,17 @@ public class MainActivity extends AppCompatActivity {
     private void startCreateTaskActivity() {
         Intent intent = new Intent(this, AddingTaskActivity.class);
         startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        DataManager.saveData(adapter.m_items, this);
     }
 
     @Override
