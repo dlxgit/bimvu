@@ -1,53 +1,55 @@
 package com.project.lab2;
 
 import android.content.Intent;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.view.View;
 
-import com.google.gson.Gson;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKSdk;
-import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKError;
-import com.vk.sdk.api.VKParameters;
-import com.vk.sdk.api.VKRequest;
-import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiComment;
 import com.vk.sdk.api.model.VKList;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity {
-    RecyclerView recyclerView;
-    MyRecyclerViewAdapter adapter;
-    VKList<VKApiComment> items;
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<VKList<VKApiComment>> {
+    RecyclerView mRecyclerView;
+    MyRecyclerViewAdapter mAdapter;
+    VKList<VKApiComment> mItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        items = new VKList<>();
-        adapter = new MyRecyclerViewAdapter(items);
-        recyclerView.setAdapter(adapter);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        mItems = new VKList<VKApiComment>();
+        mAdapter = new MyRecyclerViewAdapter(mItems);
+        mRecyclerView.setAdapter(mAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
-        recyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(layoutManager);
 
+        View v = findViewById(R.id.root_view);
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("startLoading (root)");
+                //startLoadingComments();
+            }
+        });
 
-        loadComments();
+        startLoadingComments();
 
-        recyclerView.addOnScrollListener(new MyRecyclerScrollListener(layoutManager) {
+        mRecyclerView.addOnScrollListener(new MyRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onNeedToLoad() {
                 System.out.println("wow");
-                loadComments();
+                //startLoadingComments();
             }
         });
     }
@@ -69,50 +71,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void loadComments() {
-        final VKRequest requestComments;
-        final VKParameters params = new VKParameters();
-        params.put(VKApiConst.OWNER_ID, "1");
-        params.put(VKApiConst.POST_ID, "1725537");
-        params.put(VKApiConst.COUNT, "15");
-        params.put(VKApiConst.OFFSET, items.size());
 
-        requestComments = new VKRequest("wall.getComments", params);
-        requestComments.executeWithListener(new VKRequest.VKRequestListener() {
+    @Override
+    public Loader<VKList<VKApiComment>> onCreateLoader(int id, Bundle args) {
+        int commentsOffset = args.getInt("offset");
 
-            @Override
-            public void onComplete(VKResponse response) {
-                super.onComplete(response);
+        return new MyAsyncTaskLoader(this, commentsOffset);
+    }
 
-                items.addAll(parseResult(response));
-                adapter.notifyDataSetChanged();
-            }
+    @Override
+    public void onLoadFinished(Loader<VKList<VKApiComment>> loader, VKList<VKApiComment> data) {
+        System.out.println("loading finished");
+        mItems.addAll(data);
+        mAdapter.notifyDataSetChanged();
+    }
 
-            @Override
-            public void onError(VKError error) {
-                super.onError(error);
-            }
-        });
+    @Override
+    public void onLoaderReset(Loader<VKList<VKApiComment>> loader) {
+        //.reset();
     }
 
 
-    private VKList<VKApiComment> parseResult(VKResponse response) {
-        Gson gson = new Gson();
-        VKList<VKApiComment> result = new VKList<VKApiComment>();
-        try {
-            JSONArray commentsArray = response.json.getJSONObject("response").getJSONArray("items");
-            for (int i = 0; i < commentsArray.length(); ++i) {
-                JSONObject currentJsonComment = (JSONObject) commentsArray.get(i);
-                currentJsonComment.remove("attachments");
-                String js = String.valueOf(currentJsonComment);
+    public void startLoadingComments() {
+        Bundle args = new Bundle();
+        args.putInt("offset", mItems.size());
 
-                VKApiComment currentComment = gson.fromJson(js, VKApiComment.class);
-                result.add(currentComment);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return result;
+        Loader<VKList<VKApiComment>> loader = getSupportLoaderManager().restartLoader(1, args, this);
+        //Loader<VKList<VKApiComment>> loader = getSupportLoaderManager().restartLoader(1, args, this);
+        loader.forceLoad();
     }
 }
 

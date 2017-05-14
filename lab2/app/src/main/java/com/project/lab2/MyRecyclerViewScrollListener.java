@@ -5,7 +5,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 
-public abstract class MyRecyclerScrollListener extends RecyclerView.OnScrollListener {
+public abstract class MyRecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
     static final int COUNT_UPD = 15;
 
@@ -13,7 +13,7 @@ public abstract class MyRecyclerScrollListener extends RecyclerView.OnScrollList
     int mDy = 0;
     int updatesCount = 0;
 
-    public MyRecyclerScrollListener(LinearLayoutManager layoutManager) {
+    public MyRecyclerViewScrollListener(LinearLayoutManager layoutManager) {
         this.layoutManager = layoutManager;
     }
 

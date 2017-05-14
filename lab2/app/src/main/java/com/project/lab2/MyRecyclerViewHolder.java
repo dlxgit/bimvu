@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.vk.sdk.api.model.VKApiComment;
-import com.vk.sdk.api.model.VKApiPost;
 
 public class MyRecyclerViewHolder extends RecyclerView.ViewHolder{
     private View root;
