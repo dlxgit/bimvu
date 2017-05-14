@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
@@ -28,28 +27,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mItems = new VKList<VKApiComment>();
+        mItems = DataManager.loadData(getApplicationContext());
         mAdapter = new MyRecyclerViewAdapter(mItems);
         mRecyclerView.setAdapter(mAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        View v = findViewById(R.id.root_view);
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println("startLoading (root)");
-                //startLoadingComments();
-            }
-        });
-
         startLoadingComments();
 
-        mRecyclerView.addOnScrollListener(new MyRecyclerViewScrollListener(layoutManager) {
+        mRecyclerView.addOnScrollListener(new MyRecyclerViewScrollListener(layoutManager, mItems) {
             @Override
-            public void onNeedToLoad() {
-                System.out.println("wow");
-                //startLoadingComments();
+            public void onLoadItems() {
+                startLoadingComments();
             }
         });
     }
@@ -71,34 +60,31 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        DataManager.saveData(mItems, getApplicationContext());
+    }
 
     @Override
     public Loader<VKList<VKApiComment>> onCreateLoader(int id, Bundle args) {
         int commentsOffset = args.getInt("offset");
-
         return new MyAsyncTaskLoader(this, commentsOffset);
     }
 
     @Override
     public void onLoadFinished(Loader<VKList<VKApiComment>> loader, VKList<VKApiComment> data) {
-        System.out.println("loading finished");
         mItems.addAll(data);
         mAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onLoaderReset(Loader<VKList<VKApiComment>> loader) {
-        //.reset();
-    }
-
+    public void onLoaderReset(Loader<VKList<VKApiComment>> loader) {}
 
     public void startLoadingComments() {
         Bundle args = new Bundle();
         args.putInt("offset", mItems.size());
-
         Loader<VKList<VKApiComment>> loader = getSupportLoaderManager().restartLoader(1, args, this);
-        //Loader<VKList<VKApiComment>> loader = getSupportLoaderManager().restartLoader(1, args, this);
         loader.forceLoad();
     }
 }
-

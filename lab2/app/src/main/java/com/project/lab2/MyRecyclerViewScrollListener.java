@@ -3,40 +3,44 @@ package com.project.lab2;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+
+import com.vk.sdk.api.model.VKApiComment;
+import com.vk.sdk.api.model.VKList;
+
 
 public abstract class MyRecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
-    static final int COUNT_UPD = 15;
-
     LinearLayoutManager layoutManager;
-    int mDy = 0;
-    int updatesCount = 0;
+    int mLoadCount = 0;
+    VKList<VKApiComment> mItems;
 
-    public MyRecyclerViewScrollListener(LinearLayoutManager layoutManager) {
+
+    public MyRecyclerViewScrollListener(LinearLayoutManager layoutManager, VKList<VKApiComment> items) {
+        super();
         this.layoutManager = layoutManager;
+        this.mItems = items;
     }
-
 
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
-        int currentVisible = layoutManager.findFirstVisibleItemPosition();
-        mDy += dy;
-        if(mDy >  COUNT_UPD) {
-            mDy = mDy % COUNT_UPD;
-            //load();
-            onNeedToLoad();
-
-        }
-
+        load();
     }
 
     @Override
     public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
         super.onScrollStateChanged(recyclerView, newState);
+        load();
     }
 
-    public abstract void onNeedToLoad();
+    private void load() {
+        int currentVisible = layoutManager.findLastVisibleItemPosition();
+        if(currentVisible >= mItems.size() - VkUtils.REQUEST_COMMENTS_COUNT) {
+            System.out.println("LoadingItems");
+            onLoadItems();
+            ++mLoadCount;
+        }
+    }
 
+    public abstract void onLoadItems();
 }

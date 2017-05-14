@@ -14,36 +14,40 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-
 public class VkUtils {
+    public static final int REQUEST_COMMENTS_COUNT = 15;
 
     public static VKList<VKApiComment> loadComments(int offset) {
         final VKList<VKApiComment> result = new VKList<>();
-        final VKRequest requestComments;
-        final VKParameters params = new VKParameters();
-        params.put(VKApiConst.OWNER_ID, "1");
-        params.put(VKApiConst.POST_ID, "1725537");
-        params.put(VKApiConst.COUNT, "15");
-        params.put(VKApiConst.OFFSET, offset);
 
-        requestComments = new VKRequest("wall.getComments", params);
-        requestComments.executeWithListener(new VKRequest.VKRequestListener() {
+        final VKParameters params = initRequestParameters(offset);
+        final VKRequest requestComments = new VKRequest("wall.getComments", params);
 
+        requestComments.executeSyncWithListener(new VKRequest.VKRequestListener() {
             @Override
             public void onComplete(VKResponse response) {
                 super.onComplete(response);
                 result.addAll(deserialize(response));
             }
-
             @Override
             public void onError(VKError error) {
                 super.onError(error);
-
             }
         });
 
         return result;
     }
+
+
+    private static VKParameters initRequestParameters(int offset) {
+        final VKParameters result = new VKParameters();
+        result.put(VKApiConst.OWNER_ID, "1");
+        result.put(VKApiConst.POST_ID, "1725537");
+        result.put(VKApiConst.COUNT, REQUEST_COMMENTS_COUNT);
+        result.put(VKApiConst.OFFSET, offset);
+        return result;
+    }
+
 
     //deserializing json response with deleted attachments from comments (with them - app crashes)
     private static VKList<VKApiComment> deserialize(VKResponse response) {
