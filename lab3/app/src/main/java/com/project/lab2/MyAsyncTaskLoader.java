@@ -7,7 +7,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import com.vk.sdk.api.model.VKApiComment;
 import com.vk.sdk.api.model.VKList;
 
-public class MyAsyncTaskLoader extends AsyncTaskLoader<VKList<VKApiComment>> {
+public class MyAsyncTaskLoader extends AsyncTaskLoader<VkResultModel> {
 
     int mOffset;
 
@@ -17,8 +17,8 @@ public class MyAsyncTaskLoader extends AsyncTaskLoader<VKList<VKApiComment>> {
     }
 
     @Override
-    public VKList<VKApiComment> loadInBackground() {
-        VKList<VKApiComment> result = VkUtils.loadComments(mOffset);
+    public VkResultModel loadInBackground() {
+        VkResultModel result = VkUtils.loadComments(mOffset);
         return result;
     }
 }

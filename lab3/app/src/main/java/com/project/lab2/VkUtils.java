@@ -17,9 +17,8 @@ import org.json.JSONObject;
 public class VkUtils {
     public static final int REQUEST_COMMENTS_COUNT = 15;
 
-    public static VKList<VKApiComment> loadComments(int offset) {
-        final VKList<VKApiComment> result = new VKList<>();
-
+    public static VkResultModel loadComments(int offset) {
+        final VkResultModel result = new VkResultModel();
         final VKParameters params = initRequestParameters(offset);
         final VKRequest requestComments = new VKRequest("wall.getComments", params);
 
@@ -27,17 +26,20 @@ public class VkUtils {
             @Override
             public void onComplete(VKResponse response) {
                 super.onComplete(response);
-                result.addAll(deserialize(response));
+                VkResultModel res = deserializeList(response);
+                result.setmTotalItemCount(res.getmTotalItemCount());
+                result.setmComments(res.getmComments());
             }
+
             @Override
             public void onError(VKError error) {
                 super.onError(error);
+
             }
         });
 
         return result;
     }
-
 
     private static VKParameters initRequestParameters(int offset) {
         final VKParameters result = new VKParameters();
@@ -48,15 +50,18 @@ public class VkUtils {
         return result;
     }
 
-
     //deserializing json response with deleted attachments from comments (with them - app crashes)
-    private static VKList<VKApiComment> deserialize(VKResponse response) {
+    private static VkResultModel deserializeList(VKResponse response) {
         Gson gson = new Gson();
+
         VKList<VKApiComment> result = new VKList<VKApiComment>();
+        int commentsCount = 0;
         try {
             JSONArray commentsArray = response.json.getJSONObject("response").getJSONArray("items");
+            commentsCount = response.json.getJSONObject("response").getInt("count");
+            //commentsCount = gson.fromJson(response.json.getJSONObject("response").getJSONObject("count").toString(), int.class);
 
-            for (int i = 0; i < commentsArray.length(); ++i) {
+            for (int i = commentsArray.length() - 1;  i >= 0; --i) {
                 JSONObject currentJsonComment = (JSONObject) commentsArray.get(i);
                 currentJsonComment.remove("attachments");
                 String js = String.valueOf(currentJsonComment);
@@ -67,6 +72,6 @@ public class VkUtils {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return result;
+        return new VkResultModel(commentsCount, result);
     }
 }

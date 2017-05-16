@@ -19,26 +19,30 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<VKList<VKApiComment>> {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<VkResultModel> {
     RecyclerView mRecyclerView;
     MyRecyclerViewAdapter mAdapter;
     VKList<VKApiComment> mItems;
+    int mTotalCommentsCount = 0;
+    boolean isPreLoad = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mItems = DataManager.loadData(getApplicationContext());
+        //mItems = DataManager.loadData(getApplicationContext());
+        mItems = new VKList<>();
+        //DataManager.saveData(mItems, this);
+
         mAdapter = new MyRecyclerViewAdapter(mItems);
         mRecyclerView.setAdapter(mAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        startLoadingComments();
+        startLoadingComments(); //preload
+        startLoadingComments(); //loading
 
         mRecyclerView.addOnScrollListener(new MyRecyclerViewScrollListener(layoutManager, mItems) {
             @Override
@@ -72,24 +76,38 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public Loader<VKList<VKApiComment>> onCreateLoader(int id, Bundle args) {
+    public Loader<VkResultModel> onCreateLoader(int id, Bundle args) {
         int commentsOffset = args.getInt("offset");
         return new MyAsyncTaskLoader(this, commentsOffset);
     }
 
     @Override
-    public void onLoadFinished(Loader<VKList<VKApiComment>> loader, VKList<VKApiComment> data) {
-        mItems.addAll(data);
-        mAdapter.notifyDataSetChanged();
+    public void onLoadFinished(Loader<VkResultModel> loader, VkResultModel data) {
+        if(isPreLoad) {
+            isPreLoad = !isPreLoad;
+            mTotalCommentsCount = data.getmTotalItemCount();
+            startLoadingComments();
+        }
+        else {
+            mItems.addAll(data.getmComments());
+            System.out.println("LOADED_ITEMS: " + data.getmComments().size());
+            System.out.println("WHOLE: " + data.getmTotalItemCount());
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
-    public void onLoaderReset(Loader<VKList<VKApiComment>> loader) {}
+    public void onLoaderReset(Loader<VkResultModel> loader) {}
 
     public void startLoadingComments() {
         Bundle args = new Bundle();
-        args.putInt("offset", mItems.size());
-        Loader<VKList<VKApiComment>> loader = getSupportLoaderManager().restartLoader(1, args, this);
+        if(isPreLoad) {
+            args.putInt("offset", 0);
+            }
+        else {
+            args.putInt("offset", mTotalCommentsCount - mItems.size() - VkUtils.REQUEST_COMMENTS_COUNT);
+        }
+        Loader<VkResultModel> loader = getSupportLoaderManager().restartLoader(1, args, this);
         loader.forceLoad();
     }
 }
