@@ -15,16 +15,16 @@ import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.model.VKApiComment;
 import com.vk.sdk.api.model.VKList;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<VkResultModel> {
     RecyclerView mRecyclerView;
     MyRecyclerViewAdapter mAdapter;
     VKList<VKApiComment> mItems;
     int mTotalCommentsCount = 0;
-    boolean isPreLoad = true;
+    boolean isFirstLoad = true;
+    boolean serviceConnected = false;
+
+    //Service mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +41,28 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        startLoadingComments(); //preload
-        startLoadingComments(); //loading
+/*
+        ServiceConnection  serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                mService = ((MyService.LocalBinder) service).getService();
+                serviceConnected = true;
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        };
+        */
+
+        //startLoadingPrevComments(); //preload
+        startLoadingPrevComments(); //loading
 
         mRecyclerView.addOnScrollListener(new MyRecyclerViewScrollListener(layoutManager, mItems) {
             @Override
             public void onLoadItems() {
-                startLoadingComments();
+                startLoadingPrevComments();
             }
         });
     }
@@ -78,15 +93,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public Loader<VkResultModel> onCreateLoader(int id, Bundle args) {
         int commentsOffset = args.getInt("offset");
-        return new MyAsyncTaskLoader(this, commentsOffset);
+        boolean isLoadingMostRecent = args.getBoolean("isLoadingMostRecent");
+        int itemCount = args.getInt("itemCount");
+        return new MyAsyncTaskLoader(this, commentsOffset, itemCount, isLoadingMostRecent);
     }
 
     @Override
     public void onLoadFinished(Loader<VkResultModel> loader, VkResultModel data) {
-        if(isPreLoad) {
-            isPreLoad = !isPreLoad;
+        if(isFirstLoad) {
+            isFirstLoad = !isFirstLoad;
             mTotalCommentsCount = data.getmTotalItemCount();
-            startLoadingComments();
+            startLoadingPrevComments();
         }
         else {
             mItems.addAll(data.getmComments());
@@ -99,14 +116,34 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoaderReset(Loader<VkResultModel> loader) {}
 
-    public void startLoadingComments() {
+    public void startLoadingPrevComments() {
         Bundle args = new Bundle();
-        if(isPreLoad) {
+        args.putBoolean("isLoadingMostRecent", false);
+        args.putInt("itemCount", VkUtils.REQUEST_COMMENTS_COUNT);
+        if(isFirstLoad) {
             args.putInt("offset", 0);
+
             }
         else {
             args.putInt("offset", mTotalCommentsCount - mItems.size() - VkUtils.REQUEST_COMMENTS_COUNT);
         }
+
+        Loader<VkResultModel> loader = getSupportLoaderManager().restartLoader(1, args, this);
+        loader.forceLoad();
+    }
+
+    public void startLoadingNextComments(int lastTotalCount) {
+        Bundle args = new Bundle();
+        args.putBoolean("isLoadingMostRecent", true);
+        args.putInt("itemCount", mItems.size());
+
+        int paramItemsCount = lastTotalCount - mItems.size();
+        if(paramItemsCount > VkUtils.REQUEST_COMMENTS_COUNT) {
+            paramItemsCount = VkUtils.REQUEST_COMMENTS_COUNT;
+        }
+
+        args.putInt("offset", paramItemsCount);
+
         Loader<VkResultModel> loader = getSupportLoaderManager().restartLoader(1, args, this);
         loader.forceLoad();
     }

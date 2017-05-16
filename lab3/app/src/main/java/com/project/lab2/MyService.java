@@ -8,9 +8,13 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IInterface;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -18,8 +22,19 @@ import android.support.v4.app.TaskStackBuilder;
 
 import com.vk.sdk.api.model.VKApiComment;
 import com.vk.sdk.api.model.VKList;
+import com.vk.sdk.util.VKUtil;
+
+import java.io.FileDescriptor;
 
 public class MyService extends Service {
+
+    public class LocalBinder extends Binder {
+        MyService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return MyService.this;
+        }
+    }
+
 
     private static final int NOTIFICATION_ID = 234;
 
@@ -53,28 +68,23 @@ public class MyService extends Service {
                 //do something
                 System.out.println("Service is active!");
 
-                Intent mainActivityIntent = new Intent(MyService.this, MainActivity.class);
-                TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(MyService.this)
-                                                    .addParentStack(MainActivity.class)
-                                                    .addNextIntent(mainActivityIntent);
+                int resultNewItemCount = VkUtils.loadCommentsCount();
+                if(itemCount < resultNewItemCount) {
+                    System.out.println("Need to add some");
+                    send(resultNewItemCount);
+                }
 
-                PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                Notification mNotification =
-                        new NotificationCompat.Builder(getBaseContext())
-                                .setSmallIcon(R.drawable.ic_ab_app)
-                                .setContentTitle("My notification")
-                                .setContentText("Hello World!").build();
-
-                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.notify(NOTIFICATION_ID, mNotification);
+                //mNotification.setLatestEventInfo(context, title, message, intent);
+                //notification.flags |= Notification.FLAG_AUTO_CANCEL;
+                //notificationManager.notify(0, notification);
 
 
                 mHandler.postDelayed(this, delay);
             }
         }, delay);
 
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Nullable
@@ -83,25 +93,26 @@ public class MyService extends Service {
         return null;
     }
 
-    //@Override
-    protected void onHandleIntent(@Nullable Intent intent) {
 
-        //final Handler h = new Handler();
-        final int delay = 5000; //milliseconds
-        mHandler.postDelayed(new Runnable(){
-            public void run(){
-                //do something
-                System.out.println("Service is active!");
-                NotificationCompat.Builder mBuilder =
-                        new NotificationCompat.Builder(getBaseContext())
-                                .setSmallIcon(R.drawable.ic_ab_app)
-                                .setContentTitle("My notification")
-                                .setContentText("Hello World!");
+    private void send(int newItemCount) {
 
-                mHandler.postDelayed(this, delay);
-            }
-        }, delay);
+        Intent mainActivityIntent = new Intent(MyService.this, MainActivity.class);
+        mainActivityIntent.putExtra("newItemCount", newItemCount);
 
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(MyService.this)
+                .addParentStack(MainActivity.class)
+                .addNextIntent(mainActivityIntent);
 
+        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification mNotification =
+                new NotificationCompat.Builder(getBaseContext())
+                        .setSmallIcon(R.drawable.ic_ab_app)
+                        .setContentTitle("Content changed")
+                        .setContentText("There are new posts!")
+                        .setContentIntent(pendingIntent).build();
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIFICATION_ID, mNotification);
     }
 }
