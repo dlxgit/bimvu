@@ -41,6 +41,7 @@ public class MyService extends Service {
     private Handler mHandler;
     int time = 0;
     int itemCount;
+    int firstItemOffset;
 
     public MyService() {
         super();

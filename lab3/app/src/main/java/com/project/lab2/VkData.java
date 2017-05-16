@@ -4,16 +4,17 @@ package com.project.lab2;
 import com.vk.sdk.api.model.VKApiComment;
 import com.vk.sdk.api.model.VKList;
 
-public class VkResultModel {
+public class VkData {
     private int mTotalItemCount;
     private VKList<VKApiComment> mComments;
+    private int firstOffset;
 
-    public VkResultModel() {
+    public VkData() {
         this.mComments = new VKList<>();
         this.mTotalItemCount = 0;
     }
 
-    public VkResultModel(int mTotalItemCount, VKList<VKApiComment> mComments) {
+    public VkData(int mTotalItemCount, VKList<VKApiComment> mComments) {
         this.mTotalItemCount = mTotalItemCount;
         this.mComments = mComments;
     }

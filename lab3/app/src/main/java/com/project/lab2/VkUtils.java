@@ -21,12 +21,12 @@ public class VkUtils {
 
 
     public static int loadCommentsCount() {
-        VkResultModel res = loadComments(0, 0, false);
+        VkData res = loadComments(0, 0, false);
         return res.getmTotalItemCount();
     }
 
-    public static VkResultModel loadComments(int offset, int count, final boolean isLoadingMostRecent) {
-        final VkResultModel result = new VkResultModel();
+    public static VkData loadComments(int offset, int count, final boolean isLoadingMostRecent) {
+        final VkData result = new VkData();
         final VKParameters params = initRequestParameters(offset, count);
         final VKRequest requestComments = new VKRequest("wall.getComments", params);
 
@@ -34,7 +34,7 @@ public class VkUtils {
             @Override
             public void onComplete(VKResponse response) {
                 super.onComplete(response);
-                VkResultModel res = deserializeList(response, isLoadingMostRecent);
+                VkData res = deserializeList(response, isLoadingMostRecent);
                 result.setmTotalItemCount(res.getmTotalItemCount());
                 result.setmComments(res.getmComments());
             }
@@ -58,7 +58,7 @@ public class VkUtils {
     }
 
     //deserializing json response with deleted attachments from comments (with them - app crashes)
-    private static VkResultModel deserializeList(VKResponse response, boolean isLoadingMostRecent) {
+    private static VkData deserializeList(VKResponse response, boolean isLoadingMostRecent) {
         Gson gson = new Gson();
 
         VKList<VKApiComment> result = new VKList<VKApiComment>();
@@ -83,6 +83,6 @@ public class VkUtils {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return new VkResultModel(commentsCount, result);
+        return new VkData(commentsCount, result);
     }
 }

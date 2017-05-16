@@ -21,9 +21,9 @@ public class DataManager {
 
     public static final String TASKLIST_FILE_NAME = "commentlist.json";
 
-    public static VKList<VKApiComment> loadData(Context context) {
+    public static VkData loadData(Context context) {
 
-        VKList<VKApiComment> items = new VKList<VKApiComment>();
+        VkData result = new VkData();
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(context.openFileInput(TASKLIST_FILE_NAME)));
             String line = br.readLine();
@@ -34,21 +34,21 @@ public class DataManager {
                     content += line;
                 }
             }
-            items = new Gson().fromJson(content, new TypeToken<VKList<VKApiComment>>(){}.getType());
+            result = new Gson().fromJson(content, new TypeToken<VkData>(){}.getType());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return items;
+        return result;
     }
 
-    public static void saveData(VKList<VKApiComment> items, Context context) {
+    public static void saveData(VkData model, Context context) {
         try {
-            String data = new Gson().toJson(items, new TypeToken<VKList<VKApiComment>>(){}.getType());
+            String strData = new Gson().toJson(model, new TypeToken<VkData>(){}.getType());
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
                     context.openFileOutput(TASKLIST_FILE_NAME, MODE_PRIVATE)));
-            bw.write(data);
+            bw.write(strData);
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();

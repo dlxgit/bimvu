@@ -16,13 +16,15 @@ import com.vk.sdk.api.model.VKApiComment;
 import com.vk.sdk.api.model.VKList;
 
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<VkResultModel> {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<VkData> {
     RecyclerView mRecyclerView;
     MyRecyclerViewAdapter mAdapter;
-    VKList<VKApiComment> mItems;
+    VkData mData;
     int mTotalCommentsCount = 0;
     boolean isFirstLoad = true;
     boolean serviceConnected = false;
+
+    int firstOffset;
 
     //Service mService;
 
@@ -33,13 +35,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         //mItems = DataManager.loadData(getApplicationContext());
-        mItems = new VKList<>();
+        mData = new VkData();
         //DataManager.saveData(mItems, this);
 
-        mAdapter = new MyRecyclerViewAdapter(mItems);
+        mAdapter = new MyRecyclerViewAdapter(mData.getmComments());
         mRecyclerView.setAdapter(mAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
+        //MyApplication app = (MyApplication) getApplication();
 
 /*
         ServiceConnection  serviceConnection = new ServiceConnection() {
@@ -59,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         //startLoadingPrevComments(); //preload
         startLoadingPrevComments(); //loading
 
-        mRecyclerView.addOnScrollListener(new MyRecyclerViewScrollListener(layoutManager, mItems) {
+        mRecyclerView.addOnScrollListener(new MyRecyclerViewScrollListener(layoutManager, mData.getmComments()) {
             @Override
             public void onLoadItems() {
                 startLoadingPrevComments();
@@ -87,11 +90,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onStop() {
         super.onStop();
-        DataManager.saveData(mItems, getApplicationContext());
+        DataManager.saveData(mData, getApplicationContext());
     }
 
     @Override
-    public Loader<VkResultModel> onCreateLoader(int id, Bundle args) {
+    public Loader<VkData> onCreateLoader(int id, Bundle args) {
         int commentsOffset = args.getInt("offset");
         boolean isLoadingMostRecent = args.getBoolean("isLoadingMostRecent");
         int itemCount = args.getInt("itemCount");
@@ -99,14 +102,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public void onLoadFinished(Loader<VkResultModel> loader, VkResultModel data) {
+    public void onLoadFinished(Loader<VkData> loader, VkData data) {
         if(isFirstLoad) {
             isFirstLoad = !isFirstLoad;
             mTotalCommentsCount = data.getmTotalItemCount();
             startLoadingPrevComments();
         }
         else {
-            mItems.addAll(data.getmComments());
+            mData.getmComments().addAll(data.getmComments());
             System.out.println("LOADED_ITEMS: " + data.getmComments().size());
             System.out.println("WHOLE: " + data.getmTotalItemCount());
             mAdapter.notifyDataSetChanged();
@@ -114,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public void onLoaderReset(Loader<VkResultModel> loader) {}
+    public void onLoaderReset(Loader<VkData> loader) {}
 
     public void startLoadingPrevComments() {
         Bundle args = new Bundle();
@@ -122,29 +125,28 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         args.putInt("itemCount", VkUtils.REQUEST_COMMENTS_COUNT);
         if(isFirstLoad) {
             args.putInt("offset", 0);
-
             }
         else {
-            args.putInt("offset", mTotalCommentsCount - mItems.size() - VkUtils.REQUEST_COMMENTS_COUNT);
+            args.putInt("offset", mTotalCommentsCount - mData.getmComments().size() - VkUtils.REQUEST_COMMENTS_COUNT);
         }
 
-        Loader<VkResultModel> loader = getSupportLoaderManager().restartLoader(1, args, this);
+        Loader<VkData> loader = getSupportLoaderManager().restartLoader(1, args, this);
         loader.forceLoad();
     }
 
     public void startLoadingNextComments(int lastTotalCount) {
         Bundle args = new Bundle();
         args.putBoolean("isLoadingMostRecent", true);
-        args.putInt("itemCount", mItems.size());
+        args.putInt("itemCount", mData.getmComments().size());
 
-        int paramItemsCount = lastTotalCount - mItems.size();
+        int paramItemsCount = lastTotalCount - mData.getmComments().size();
         if(paramItemsCount > VkUtils.REQUEST_COMMENTS_COUNT) {
             paramItemsCount = VkUtils.REQUEST_COMMENTS_COUNT;
         }
 
         args.putInt("offset", paramItemsCount);
 
-        Loader<VkResultModel> loader = getSupportLoaderManager().restartLoader(1, args, this);
+        Loader<VkData> loader = getSupportLoaderManager().restartLoader(1, args, this);
         loader.forceLoad();
     }
 }

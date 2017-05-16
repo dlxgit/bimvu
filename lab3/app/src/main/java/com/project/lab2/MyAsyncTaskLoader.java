@@ -5,7 +5,7 @@ import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
 
-public class MyAsyncTaskLoader extends AsyncTaskLoader<VkResultModel> {
+public class MyAsyncTaskLoader extends AsyncTaskLoader<VkData> {
 
     boolean mIsLoadingMostRecent;
     int mOffset;
@@ -19,8 +19,8 @@ public class MyAsyncTaskLoader extends AsyncTaskLoader<VkResultModel> {
     }
 
     @Override
-    public VkResultModel loadInBackground() {
-        VkResultModel result = VkUtils.loadComments(mOffset, mItemCount, mIsLoadingMostRecent);
+    public VkData loadInBackground() {
+        VkData result = VkUtils.loadComments(mOffset, mItemCount, mIsLoadingMostRecent);
         return result;
     }
 }

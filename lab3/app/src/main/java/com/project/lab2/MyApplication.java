@@ -7,7 +7,6 @@ import com.vk.sdk.VKAccessTokenTracker;
 import com.vk.sdk.VKSdk;
 
 
-
 public class MyApplication extends android.app.Application {
 
     VKAccessTokenTracker vkAccessTokenTracker = new VKAccessTokenTracker() {
@@ -19,14 +18,27 @@ public class MyApplication extends android.app.Application {
         }
     };
 
+    private MyApplication instance;
+    private VkData data;
+
+
+    public MyApplication getInstance() {
+        return instance;
+    }
+
+    public VkData getData() {
+        return data;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         vkAccessTokenTracker.startTracking();
         VKSdk.initialize(this);
 
+        instance = this;
+
         Intent intent = new Intent(this, MyService.class);
         this.startService(intent);
-
     }
 }
