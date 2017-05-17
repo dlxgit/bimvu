@@ -1,6 +1,9 @@
 package com.project.lab2;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -23,10 +26,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     int mTotalCommentsCount = 0;
     boolean isFirstLoad = true;
     boolean serviceConnected = false;
-
     int firstOffset;
 
-    //Service mService;
+    MyService mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,25 +44,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mRecyclerView.setAdapter(mAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
-        //MyApplication app = (MyApplication) getApplication();
-
-/*
-        ServiceConnection  serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                mService = ((MyService.LocalBinder) service).getService();
-                serviceConnected = true;
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        };
-        */
-
-        //startLoadingPrevComments(); //preload
-        startLoadingPrevComments(); //loading
 
         mRecyclerView.addOnScrollListener(new MyRecyclerViewScrollListener(layoutManager, mData.getmComments()) {
             @Override
@@ -68,22 +51,33 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 startLoadingPrevComments();
             }
         });
+
+        startLoadingPrevComments(); //loading
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+
         if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
             @Override
             public void onResult(VKAccessToken res) {
                 // User passed Authorization
+                System.out.println("onActivityResult()");
+                startLoadingNextComments(firstOffset);
             }
 
             @Override
             public void onError(VKError error) {
                 // User didn't pass Authorization
+                System.out.println("onActivityResulterr()");
+                startLoadingNextComments(firstOffset);
             }
-        })) {
+        }))
+        {
             super.onActivityResult(requestCode, resultCode, data);
+            System.out.println("onActivityResultt()");
+            startLoadingNextComments(firstOffset);
         }
     }
 
@@ -109,9 +103,28 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             startLoadingPrevComments();
         }
         else {
-            mData.getmComments().addAll(data.getmComments());
+            VKList<VKApiComment> currentComments = mData.getmComments();
+            VKList<VKApiComment> newComments = data.getmComments();
             System.out.println("LOADED_ITEMS: " + data.getmComments().size());
-            System.out.println("WHOLE: " + data.getmTotalItemCount());
+            if(data.isLoadingNew()) {
+                System.out.println("NEW");
+                currentComments.addAll(0, newComments);
+                if(data.getFirstOffset() > mData.getFirstOffset()) {
+                    mData.setFirstOffset(data.getFirstOffset());
+                    restartService(mData.getFirstOffset());
+                }
+            }
+            else {
+                System.out.println("OLD");
+
+                currentComments.addAll(newComments);
+                if(data.getFirstOffset() > mData.getFirstOffset()) {
+                    mData.setFirstOffset(data.getFirstOffset());
+                    restartService(mData.getFirstOffset());
+                }
+
+                mData.setFirstOffset(data.getFirstOffset());
+            }
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -125,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         args.putInt("itemCount", VkUtils.REQUEST_COMMENTS_COUNT);
         if(isFirstLoad) {
             args.putInt("offset", 0);
-            }
+        }
         else {
             args.putInt("offset", mTotalCommentsCount - mData.getmComments().size() - VkUtils.REQUEST_COMMENTS_COUNT);
         }
@@ -148,5 +161,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         Loader<VkData> loader = getSupportLoaderManager().restartLoader(1, args, this);
         loader.forceLoad();
+    }
+
+    private void restartService(int newOffset) {
+        Intent intent = new Intent(this, MyService.class);
+        intent.putExtra("firstOffset", newOffset);
+        startService(intent);
     }
 }

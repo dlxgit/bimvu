@@ -59,33 +59,41 @@ public class MyService extends Service {
         mHandler = new Handler();
     }
 
+    public int getFirstItemOffset() {
+        return firstItemOffset;
+    }
+
+    public void setFirstItemOffset(int firstItemOffset) {
+        this.firstItemOffset = firstItemOffset;
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         System.out.println("Service is active!");
+        if(intent == null) {
+            System.out.println("Service [null]");
+            return START_NOT_STICKY;
+        }
+
+        firstItemOffset = intent.getIntExtra("firstOffset", 0);
+
         final int delay = 5000; //milliseconds
         mHandler.postDelayed(new Runnable(){
             public void run(){
                 //do something
-                System.out.println("Service is active!");
+                int newFirstOffset = VkUtils.loadComments(firstItemOffset, VkUtils.REQUEST_COMMENTS_COUNT, true).getFirstOffset();
 
-                int resultNewItemCount = VkUtils.loadCommentsCount();
-                if(itemCount < resultNewItemCount) {
-                    System.out.println("Need to add some");
-                    send(resultNewItemCount);
+                System.out.println("[service] offset:" + String.valueOf(firstItemOffset) + "/" + String.valueOf(newFirstOffset));
+
+                if(firstItemOffset < newFirstOffset) {
+                    System.out.println("Need to add some!");
+                    send(newFirstOffset);
                 }
-
-
-                //mNotification.setLatestEventInfo(context, title, message, intent);
-                //notification.flags |= Notification.FLAG_AUTO_CANCEL;
-                //notificationManager.notify(0, notification);
-
-
                 mHandler.postDelayed(this, delay);
             }
         }, delay);
 
-        return START_STICKY;
+        return START_REDELIVER_INTENT;
     }
 
     @Nullable
@@ -95,25 +103,38 @@ public class MyService extends Service {
     }
 
 
-    private void send(int newItemCount) {
+    private void send(int newFirstOffset) {
 
+        System.out.println("Sending new offset: " + newFirstOffset);
         Intent mainActivityIntent = new Intent(MyService.this, MainActivity.class);
-        mainActivityIntent.putExtra("newItemCount", newItemCount);
+        mainActivityIntent.putExtra("newFirstOffset", newFirstOffset);
 
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(MyService.this)
-                .addParentStack(MainActivity.class)
-                .addNextIntent(mainActivityIntent);
+                                                            .addParentStack(MainActivity.class)
+                                                            .addNextIntent(mainActivityIntent);
 
-        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_CANCEL_CURRENT);
 
         Notification mNotification =
                 new NotificationCompat.Builder(getBaseContext())
                         .setSmallIcon(R.drawable.ic_ab_app)
                         .setContentTitle("Content changed")
                         .setContentText("There are new posts!")
-                        .setContentIntent(pendingIntent).build();
+                        .setContentIntent(pendingIntent)
+                        .setAutoCancel(true)
+                        .build();
+
+        //mNotification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, mNotification);
+        this.firstItemOffset = newFirstOffset;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        System.out.println("Service destroy");
+
     }
 }

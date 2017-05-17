@@ -5,9 +5,6 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.vk.sdk.api.model.VKApiComment;
-import com.vk.sdk.api.model.VKList;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;

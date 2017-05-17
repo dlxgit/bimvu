@@ -25,7 +25,7 @@ public class VkUtils {
         return res.getmTotalItemCount();
     }
 
-    public static VkData loadComments(int offset, int count, final boolean isLoadingMostRecent) {
+    public static VkData loadComments(final int offset, int count, final boolean isLoadingMostRecent) {
         final VkData result = new VkData();
         final VKParameters params = initRequestParameters(offset, count);
         final VKRequest requestComments = new VKRequest("wall.getComments", params);
@@ -37,6 +37,8 @@ public class VkUtils {
                 VkData res = deserializeList(response, isLoadingMostRecent);
                 result.setmTotalItemCount(res.getmTotalItemCount());
                 result.setmComments(res.getmComments());
+                result.setFirstOffset(res.getFirstOffset());
+                //result.setFirstOffset(isLoadingMostRecent ? res.getFirstOffset() : res.getFirstOffset() + res.getmComments().size());
             }
 
             @Override
@@ -83,6 +85,12 @@ public class VkUtils {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return new VkData(commentsCount, result);
+
+        int offset = (int) response.request.getMethodParameters().get(VKApiConst.OFFSET);
+        //if(isLoadingMostRecent) {
+            offset += result.size() - 1;
+        //}
+
+        return new VkData(commentsCount, result, offset, isLoadingMostRecent);
     }
 }
