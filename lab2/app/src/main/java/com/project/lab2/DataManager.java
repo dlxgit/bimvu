@@ -43,15 +43,29 @@ public class DataManager {
         return items;
     }
 
+    public static void saveDataInBackground(VKList<VKApiComment> items, Context context) {
+        new SaveAsyncTask(items, context).execute();
+    }
+
+
     public static void saveData(VKList<VKApiComment> items, Context context) {
-        try {
-            String data = new Gson().toJson(items, new TypeToken<VKList<VKApiComment>>(){}.getType());
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                    context.openFileOutput(TASKLIST_FILE_NAME, MODE_PRIVATE)));
-            bw.write(data);
-            bw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            BufferedWriter bw = null;
+            try {
+                String data = new Gson().toJson(items, new TypeToken<VKList<VKApiComment>>(){}.getType());
+                bw = new BufferedWriter(new OutputStreamWriter(
+                        context.openFileOutput(TASKLIST_FILE_NAME, MODE_PRIVATE)));
+                bw.write(data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            finally {
+                if(bw != null) {
+                    try {
+                        bw.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
     }
 }

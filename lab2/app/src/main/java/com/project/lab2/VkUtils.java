@@ -1,6 +1,7 @@
 package com.project.lab2;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
@@ -15,7 +16,7 @@ import org.json.JSONObject;
 
 
 public class VkUtils {
-    public static final int REQUEST_COMMENTS_COUNT = 15;
+    public static final int REQUEST_COMMENTS_COUNT = 30;
 
     public static VKList<VKApiComment> loadComments(int offset) {
         final VKList<VKApiComment> result = new VKList<>();
@@ -56,6 +57,7 @@ public class VkUtils {
         try {
             JSONArray commentsArray = response.json.getJSONObject("response").getJSONArray("items");
 
+            //for(JsonElement el : commentsArray)
             for (int i = 0; i < commentsArray.length(); ++i) {
                 JSONObject currentJsonComment = (JSONObject) commentsArray.get(i);
                 currentJsonComment.remove("attachments");

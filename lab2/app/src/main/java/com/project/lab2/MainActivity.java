@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        //mItems = new VKList<>();
         mItems = DataManager.loadData(getApplicationContext());
         mAdapter = new MyRecyclerViewAdapter(mItems);
         mRecyclerView.setAdapter(mAdapter);
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onStop() {
         super.onStop();
-        DataManager.saveData(mItems, getApplicationContext());
+        DataManager.saveDataInBackground(mItems, getApplicationContext());
     }
 
     @Override
