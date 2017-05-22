@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.google.gson.Gson;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKSdk;
@@ -23,26 +24,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     RecyclerView mRecyclerView;
     MyRecyclerViewAdapter mAdapter;
     VkData mData;
-    int mLastOffset = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = getIntent();
-        System.out.println("OnCreate() intent");
-        if(intent != null) {
-            System.out.println("not_null");
-            String jsonComments = intent.getStringExtra("newData");
-            System.out.println("json = " + jsonComments);
-            
-        }
-
-
-
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mData = DataManager.loadData(getApplicationContext());
+        //mData = new VkData();
+        handleServiceIntent();
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+
         if(mData.getmComments().isEmpty()) {
             startLoadingComments();
         }
@@ -65,19 +57,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 startLoadingComments();
             }
         });
-
-        //catch intent and:
-        /*
-          if(data.getmFirstOffset() > mData.getmFirstOffset()) {
-             mData.setmFirstOffset(data.getmFirstOffset());
-             restartService(mData.getmFirstOffset());
-
-
-             //modify lastOffset
-         }
-         */
-        //restartService(mData.getmFirstOffset());
-        //startLoadingComments(); //loading
     }
 
     @Override
@@ -106,7 +85,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onStop() {
         super.onStop();
-        DataManager.saveData(mData, getApplicationContext());
+        DataManager.saveDataInBackground(mData, getApplicationContext());
+        //DataManager.saveData(mData, getApplicationContext());
     }
 
     @Override
@@ -119,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<VkData> loader, VkData data) {
         boolean isFirstLoad = false;
-        if(mData.getmFirstOffset() < data.getmFirstOffset()) { //if new elements are at top
+        if(mData.getmFirstOffset() < data.getmFirstOffset() || data.getmComments().isEmpty()) { //if new elements are at top
             isFirstLoad = true;
         }
 
@@ -140,14 +120,19 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         //mData.setmFirstOffset(data.getmFirstOffset());
         mAdapter.notifyDataSetChanged();
         if(isFirstLoad) {
-            restartService(mData.getmFirstOffset());
+            if(data.getmComments().isEmpty()) {
+                startLoadingComments();
+            }
+            else {
+                restartService(mData.getmFirstOffset());
+            }
         }
     }
 
     @Override
     public void onLoaderReset(Loader<VkData> loader) {}
 
-    public void startLoadingComments() {
+    private void startLoadingComments() {
         Bundle args = new Bundle();
         args.putInt("itemCount", VkUtils.REQUEST_COMMENTS_COUNT);
 
@@ -168,5 +153,27 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Intent intent = new Intent(this, MyService.class);
         intent.putExtra("firstOffset", newOffset);
         startService(intent);
+    }
+
+    private void handleServiceIntent() {
+        Intent intent = getIntent();
+        System.out.println("OnCreate() intent");
+        VkData serviceItems = new VkData();
+        if(intent != null) {
+            System.out.println("not_null");
+            String jsonComments = intent.getStringExtra("newData");
+            if(jsonComments == null) {
+                return;
+            }
+
+            System.out.println("json = " + jsonComments);
+            serviceItems = new Gson().fromJson(jsonComments, VkData.class);
+            if(serviceItems.getmFirstOffset() > 0) {
+                mData.getmComments().addAll(0, serviceItems.getmComments());
+                mData.setTotalItemCount(serviceItems.getmTotalItemCount());
+                mData.setmFirstOffset(serviceItems.getmFirstOffset());
+                restartService(mData.getmFirstOffset());
+            }
+        }
     }
 }

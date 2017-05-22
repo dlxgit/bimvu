@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 
 public class VkUtils {
-    public static final int REQUEST_COMMENTS_COUNT = 15;
+    public static final int REQUEST_COMMENTS_COUNT = 30;
 
 
     public static VkData loadComments(final int offset, int count) {
@@ -27,7 +27,7 @@ public class VkUtils {
             @Override
             public void onComplete(VKResponse response) {
                 super.onComplete(response);
-                VkData res = deserializeList(response);
+                VkData res = handleResponse(response);
                 result.setTotalItemCount(res.getmTotalItemCount());
                 if(offset == 0) {
                     result.setComments(new VKList<VKApiComment>());
@@ -60,7 +60,7 @@ public class VkUtils {
     }
 
     //deserializing json response with deleted attachments from comments (with them - app crashes)
-    private static VkData deserializeList(VKResponse response) {
+    private static VkData handleResponse(VKResponse response) {
         Gson gson = new Gson();
 
         VKList<VKApiComment> result = new VKList<VKApiComment>();

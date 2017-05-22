@@ -5,6 +5,9 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.vk.sdk.api.model.VKApiComment;
+import com.vk.sdk.api.model.VKList;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -35,6 +38,10 @@ public class DataManager {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public static void saveDataInBackground(VkData data, Context context) {
+        new SaveAsyncTask(data, context).execute();
     }
 
     public static void saveData(VkData model, Context context) {

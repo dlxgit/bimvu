@@ -36,7 +36,7 @@ public abstract class MyRecyclerViewScrollListener extends RecyclerView.OnScroll
     private void load() {
         int currentVisible = layoutManager.findLastVisibleItemPosition();
         if(currentVisible >= mItems.size() - VkUtils.REQUEST_COMMENTS_COUNT) {
-            System.out.println("LoadingItems");
+            System.out.println("ScrollListener Tick.");
             onLoadItems();
             ++mLoadCount;
         }

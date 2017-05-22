@@ -28,11 +28,11 @@ public class MyService extends Service {
         }
     }
 
-
     private static final int NOTIFICATION_ID = 234;
 
     private Handler mHandler;
     VkData mCollectedData;
+    Intent mIntent;
 
     public MyService() {
         super();
@@ -48,6 +48,7 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mIntent = intent;
         System.out.println("onStartCommand()");
         if(intent == null) {
             System.out.println("Service [null]");
@@ -59,7 +60,7 @@ public class MyService extends Service {
         mHandler.postDelayed(new Runnable(){
             public void run(){
                 VkData newData = VkUtils.loadComments(mCollectedData.getmFirstOffset() + 1, VkUtils.REQUEST_COMMENTS_COUNT);
-                System.out.println("Tick.");
+                System.out.println("Service Tick.");
                 if(!newData.getmComments().isEmpty()) {
                     System.out.println("successful(" + newData.getmFirstOffset() + ")");
                     Collections.reverse(newData.getmComments());
@@ -67,10 +68,10 @@ public class MyService extends Service {
                     mCollectedData.setTotalItemCount(newData.getmTotalItemCount());
                     mCollectedData.setmFirstOffset(newData.getmFirstOffset());
 
-                    System.out.println("Need to add some!");
+                    System.out.println("changes_detected!");
                     sendCollectedData();
                 } else {
-                    System.out.println("bad");
+                    System.out.println("no_changes");
                 }
 
                 System.out.println("[service] offset:" + String.valueOf(mCollectedData.getmFirstOffset()) + "/" + String.valueOf(newData.getmFirstOffset()));
@@ -78,7 +79,7 @@ public class MyService extends Service {
             }
         }, delay);
 
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
     }
 
     @Nullable
@@ -133,6 +134,8 @@ public class MyService extends Service {
     public void onDestroy() {
         super.onDestroy();
         System.out.println("Service destroy");
-
+        if(mIntent != null) {
+            //startService(mIntent);
+        }
     }
 }
