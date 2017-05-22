@@ -1,6 +1,8 @@
 package com.project.lab2;
 
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.vk.sdk.api.model.VKApiComment;
 import com.vk.sdk.api.model.VKList;
 
@@ -8,7 +10,6 @@ public class VkData {
     private int mTotalItemCount;
     private VKList<VKApiComment> mComments;
     private int firstOffset;
-    private boolean isLoadingNew = false;
 
     public VkData() {
         this.mComments = new VKList<>();
@@ -21,19 +22,14 @@ public class VkData {
         this.mComments = mComments;
     }
 
-    public VkData(int mTotalItemCount, VKList<VKApiComment> mComments, int firstOffset, boolean isLoadingNew) {
+    public VkData(int mTotalItemCount, VKList<VKApiComment> mComments, int firstOffset) {
         this.mTotalItemCount = mTotalItemCount;
         this.mComments = mComments;
         this.firstOffset = firstOffset;
-        this.isLoadingNew = isLoadingNew;
     }
 
-    public boolean isLoadingNew() {
-        return isLoadingNew;
-    }
-
-    public void setLoadingNew(boolean loadingNew) {
-        isLoadingNew = loadingNew;
+    public String toJsonString() {
+        return new Gson().toJson(this, new TypeToken<VkData>(){}.getType());
     }
 
     public int getFirstOffset() {
@@ -44,11 +40,11 @@ public class VkData {
         this.firstOffset = firstOffset;
     }
 
-    public void setmTotalItemCount(int mTotalItemCount) {
+    public void setTotalItemCount(int mTotalItemCount) {
         this.mTotalItemCount = mTotalItemCount;
     }
 
-    public void setmComments(VKList<VKApiComment> mComments) {
+    public void setComments(VKList<VKApiComment> mComments) {
         this.mComments = mComments;
     }
 

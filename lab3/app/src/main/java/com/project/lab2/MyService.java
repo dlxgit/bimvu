@@ -39,8 +39,6 @@ public class MyService extends Service {
     private static final int NOTIFICATION_ID = 234;
 
     private Handler mHandler;
-    int time = 0;
-    int itemCount;
     int firstItemOffset;
 
     public MyService() {
@@ -51,20 +49,7 @@ public class MyService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        //VKList<VKApiComment> DataManager.loadData(getBaseContext());
-        //IntentService
-//        HandlerThread thread = new HandlerThread("");
-//        thread.start();
-//        mHandler = new Handler(thread.getLooper());
         mHandler = new Handler();
-    }
-
-    public int getFirstItemOffset() {
-        return firstItemOffset;
-    }
-
-    public void setFirstItemOffset(int firstItemOffset) {
-        this.firstItemOffset = firstItemOffset;
     }
 
     @Override
@@ -80,14 +65,14 @@ public class MyService extends Service {
         final int delay = 5000; //milliseconds
         mHandler.postDelayed(new Runnable(){
             public void run(){
-                //do something
-                int newFirstOffset = VkUtils.loadComments(firstItemOffset, VkUtils.REQUEST_COMMENTS_COUNT, true).getFirstOffset();
+                VkData newData = VkUtils.loadComments(firstItemOffset, VkUtils.REQUEST_COMMENTS_COUNT);
+                int newFirstOffset = newData.getFirstOffset();
 
                 System.out.println("[service] offset:" + String.valueOf(firstItemOffset) + "/" + String.valueOf(newFirstOffset));
 
                 if(firstItemOffset < newFirstOffset) {
                     System.out.println("Need to add some!");
-                    send(newFirstOffset);
+                    send(newData);
                 }
                 mHandler.postDelayed(this, delay);
             }
@@ -103,11 +88,13 @@ public class MyService extends Service {
     }
 
 
-    private void send(int newFirstOffset) {
-
+    private void send(VkData data) {
+        int newFirstOffset = data.getFirstOffset();
         System.out.println("Sending new offset: " + newFirstOffset);
         Intent mainActivityIntent = new Intent(MyService.this, MainActivity.class);
-        mainActivityIntent.putExtra("newFirstOffset", newFirstOffset);
+
+
+        mainActivityIntent.putExtra("newData", data.toJsonString());
 
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(MyService.this)
                                                             .addParentStack(MainActivity.class)

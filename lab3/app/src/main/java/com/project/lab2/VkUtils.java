@@ -13,19 +13,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Collections;
-
 
 public class VkUtils {
     public static final int REQUEST_COMMENTS_COUNT = 15;
 
 
-    public static int loadCommentsCount() {
-        VkData res = loadComments(0, 0, false);
-        return res.getmTotalItemCount();
-    }
-
-    public static VkData loadComments(final int offset, int count, final boolean isLoadingMostRecent) {
+    public static VkData loadComments(final int offset, int count) {
         final VkData result = new VkData();
         final VKParameters params = initRequestParameters(offset, count);
         final VKRequest requestComments = new VKRequest("wall.getComments", params);
@@ -34,9 +27,9 @@ public class VkUtils {
             @Override
             public void onComplete(VKResponse response) {
                 super.onComplete(response);
-                VkData res = deserializeList(response, isLoadingMostRecent);
-                result.setmTotalItemCount(res.getmTotalItemCount());
-                result.setmComments(res.getmComments());
+                VkData res = deserializeList(response);
+                result.setTotalItemCount(res.getmTotalItemCount());
+                result.setComments(res.getmComments());
                 result.setFirstOffset(res.getFirstOffset());
                 //result.setFirstOffset(isLoadingMostRecent ? res.getFirstOffset() : res.getFirstOffset() + res.getmComments().size());
             }
@@ -60,7 +53,7 @@ public class VkUtils {
     }
 
     //deserializing json response with deleted attachments from comments (with them - app crashes)
-    private static VkData deserializeList(VKResponse response, boolean isLoadingMostRecent) {
+    private static VkData deserializeList(VKResponse response) {
         Gson gson = new Gson();
 
         VKList<VKApiComment> result = new VKList<VKApiComment>();
@@ -70,16 +63,12 @@ public class VkUtils {
             commentsCount = response.json.getJSONObject("response").getInt("count");
             //commentsCount = gson.fromJson(response.json.getJSONObject("response").getJSONObject("count").toString(), int.class);
 
-            for (int i = commentsArray.length() - 1;  i >= 0; --i) {
+            for (int i = 0; i < commentsArray.length(); ++i) {
                 JSONObject currentJsonComment = (JSONObject) commentsArray.get(i);
                 currentJsonComment.remove("attachments");
                 String js = String.valueOf(currentJsonComment);
-
                 VKApiComment currentComment = gson.fromJson(js, VKApiComment.class);
                 result.add(currentComment);
-            }
-            if(isLoadingMostRecent) {
-                Collections.reverse(result);
             }
 
         } catch (JSONException e) {
@@ -91,6 +80,6 @@ public class VkUtils {
             offset += result.size() - 1;
         //}
 
-        return new VkData(commentsCount, result, offset, isLoadingMostRecent);
+        return new VkData(commentsCount, result, offset);
     }
 }
