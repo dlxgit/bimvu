@@ -28,16 +28,16 @@ public class VkUtils {
             public void onComplete(VKResponse response) {
                 super.onComplete(response);
                 VkData res = handleResponse(response);
-                result.setTotalItemCount(res.getmTotalItemCount());
+                result.setTotalItemCount(res.getTotalItemCount());
                 if(offset == 0) {
                     result.setComments(new VKList<VKApiComment>());
-                    result.setmFirstOffset(0);
+                    result.setFirstOffset(0);
                 }
                 else {
                     result.setComments(res.getmComments());
-                    result.setmFirstOffset(res.getmFirstOffset());
+                    result.setFirstOffset(res.getFirstOffset());
                 }
-                //result.setmFirstOffset(isLoadingMostRecent ? res.getmFirstOffset() : res.getmFirstOffset() + res.getmComments().size());
+                //result.setFirstOffset(isLoadingMostRecent ? res.getFirstOffset() : res.getFirstOffset() + res.getmComments().size());
             }
 
             @Override

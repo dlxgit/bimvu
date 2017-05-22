@@ -21,9 +21,9 @@ import java.util.Collections;
 
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<VkData> {
-    RecyclerView mRecyclerView;
-    MyRecyclerViewAdapter mAdapter;
-    VkData mData;
+    private RecyclerView mRecyclerView;
+    private MyRecyclerViewAdapter mAdapter;
+    private VkData mData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             startLoadingComments();
         }
         else {
-            restartService(mData.getmFirstOffset());
+            restartService(mData.getFirstOffset());
         }
 
         //mData = new VkData();
@@ -99,32 +99,32 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<VkData> loader, VkData data) {
         boolean isFirstLoad = false;
-        if(mData.getmFirstOffset() < data.getmFirstOffset() || data.getmComments().isEmpty()) { //if new elements are at top
+        if(mData.getFirstOffset() < data.getFirstOffset() || data.getmComments().isEmpty()) { //if new elements are at top
             isFirstLoad = true;
         }
 
         VKList<VKApiComment> currentComments = mData.getmComments();
         VKList<VKApiComment> newComments = data.getmComments();
         Collections.reverse(newComments);
-        mData.setTotalItemCount(data.getmTotalItemCount());
-        mData.setmFirstOffset(data.getmFirstOffset());
+        mData.setTotalItemCount(data.getTotalItemCount());
+        mData.setFirstOffset(data.getFirstOffset());
 
-        System.out.println("LOADED_ITEMS: " + data.getmComments().size() + " newTotal: " + data.getmTotalItemCount());
+        System.out.println("LOADED_ITEMS: " + data.getmComments().size() + " newTotal: " + data.getTotalItemCount());
 
         //currentComments.addAll(0, newComments);
         currentComments.addAll(newComments);
-//            if(data.getmFirstOffset() > mData.getmFirstOffset()) {
-//                mData.setmFirstOffset(data.getmFirstOffset());
-//                restartService(mData.getmFirstOffset());
+//            if(data.getFirstOffset() > mData.getFirstOffset()) {
+//                mData.setFirstOffset(data.getFirstOffset());
+//                restartService(mData.getFirstOffset());
 //            }
-        //mData.setmFirstOffset(data.getmFirstOffset());
+        //mData.setFirstOffset(data.getFirstOffset());
         mAdapter.notifyDataSetChanged();
         if(isFirstLoad) {
             if(data.getmComments().isEmpty()) {
                 startLoadingComments();
             }
             else {
-                restartService(mData.getmFirstOffset());
+                restartService(mData.getFirstOffset());
             }
         }
     }
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Bundle args = new Bundle();
         args.putInt("itemCount", VkUtils.REQUEST_COMMENTS_COUNT);
 
-        int requestedOffset = mData.getmTotalItemCount() - mData.getmComments().size() - VkUtils.REQUEST_COMMENTS_COUNT;
+        int requestedOffset = mData.getTotalItemCount() - mData.getmComments().size() - VkUtils.REQUEST_COMMENTS_COUNT;
         if(requestedOffset < 0) {
             requestedOffset = 0;
         }
@@ -168,11 +168,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             System.out.println("json = " + jsonComments);
             serviceItems = new Gson().fromJson(jsonComments, VkData.class);
-            if(serviceItems.getmFirstOffset() > 0) {
+            if(serviceItems.getFirstOffset() > 0) {
                 mData.getmComments().addAll(0, serviceItems.getmComments());
-                mData.setTotalItemCount(serviceItems.getmTotalItemCount());
-                mData.setmFirstOffset(serviceItems.getmFirstOffset());
-                restartService(mData.getmFirstOffset());
+                mData.setTotalItemCount(serviceItems.getTotalItemCount());
+                mData.setFirstOffset(serviceItems.getFirstOffset());
+                restartService(mData.getFirstOffset());
             }
         }
     }

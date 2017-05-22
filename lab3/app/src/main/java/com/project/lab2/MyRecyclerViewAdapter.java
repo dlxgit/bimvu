@@ -11,7 +11,7 @@ import java.util.List;
 
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewHolder> {
-    List<VKApiComment> mItems;
+    private List<VKApiComment> mItems;
 
     public MyRecyclerViewAdapter(List<VKApiComment> m_items) {
         this.mItems = m_items;

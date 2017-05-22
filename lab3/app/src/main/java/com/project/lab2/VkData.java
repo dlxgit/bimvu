@@ -32,11 +32,11 @@ public class VkData {
         return new Gson().toJson(this, new TypeToken<VkData>(){}.getType());
     }
 
-    public int getmFirstOffset() {
+    public int getFirstOffset() {
         return mFirstOffset;
     }
 
-    public void setmFirstOffset(int mFirstOffset) {
+    public void setFirstOffset(int mFirstOffset) {
         this.mFirstOffset = mFirstOffset;
     }
 
@@ -48,7 +48,7 @@ public class VkData {
         this.mComments = mComments;
     }
 
-    public int getmTotalItemCount() {
+    public int getTotalItemCount() {
         return mTotalItemCount;
     }
 

@@ -16,7 +16,6 @@ import android.support.v4.app.TaskStackBuilder;
 
 import com.vk.sdk.api.model.VKApiComment;
 
-import java.util.Collection;
 import java.util.Collections;
 
 public class MyService extends Service {
@@ -31,8 +30,8 @@ public class MyService extends Service {
     private static final int NOTIFICATION_ID = 234;
 
     private Handler mHandler;
-    VkData mCollectedData;
-    Intent mIntent;
+    private VkData mCollectedData;
+    private Intent mIntent;
 
     public MyService() {
         super();
@@ -54,19 +53,19 @@ public class MyService extends Service {
             System.out.println("Service [null]");
             return START_NOT_STICKY;
         }
-        mCollectedData.setmFirstOffset(intent.getIntExtra("firstOffset", 0));
+        mCollectedData.setFirstOffset(intent.getIntExtra("firstOffset", 0));
 
         final int delay = 5000; //milliseconds
         mHandler.postDelayed(new Runnable(){
             public void run(){
-                VkData newData = VkUtils.loadComments(mCollectedData.getmFirstOffset() + 1, VkUtils.REQUEST_COMMENTS_COUNT);
+                VkData newData = VkUtils.loadComments(mCollectedData.getFirstOffset() + 1, VkUtils.REQUEST_COMMENTS_COUNT);
                 System.out.println("Service Tick.");
                 if(!newData.getmComments().isEmpty()) {
-                    System.out.println("successful(" + newData.getmFirstOffset() + ")");
+                    System.out.println("successful(" + newData.getFirstOffset() + ")");
                     Collections.reverse(newData.getmComments());
                     mCollectedData.getmComments().addAll(0, newData.getmComments());
-                    mCollectedData.setTotalItemCount(newData.getmTotalItemCount());
-                    mCollectedData.setmFirstOffset(newData.getmFirstOffset());
+                    mCollectedData.setTotalItemCount(newData.getTotalItemCount());
+                    mCollectedData.setFirstOffset(newData.getFirstOffset());
 
                     System.out.println("changes_detected!");
                     sendCollectedData();
@@ -74,7 +73,7 @@ public class MyService extends Service {
                     System.out.println("no_changes");
                 }
 
-                System.out.println("[service] offset:" + String.valueOf(mCollectedData.getmFirstOffset()) + "/" + String.valueOf(newData.getmFirstOffset()));
+                System.out.println("[service] offset:" + String.valueOf(mCollectedData.getFirstOffset()) + "/" + String.valueOf(newData.getFirstOffset()));
                 mHandler.postDelayed(this, delay);
             }
         }, delay);
@@ -98,7 +97,7 @@ public class MyService extends Service {
     }
 
     private void sendCollectedData() {
-        int newFirstOffset = mCollectedData.getmFirstOffset();
+        int newFirstOffset = mCollectedData.getFirstOffset();
         System.out.println("COLLECTED: " + newFirstOffset);
         debugPrintLst();
 

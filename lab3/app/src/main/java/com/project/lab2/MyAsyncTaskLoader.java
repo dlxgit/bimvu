@@ -7,8 +7,8 @@ import android.support.v4.content.AsyncTaskLoader;
 
 public class MyAsyncTaskLoader extends AsyncTaskLoader<VkData> {
 
-    int mOffset;
-    int mItemCount;
+    private int mOffset;
+    private int mItemCount;
 
     public MyAsyncTaskLoader(Context context, int offset, int count) {
         super(context);

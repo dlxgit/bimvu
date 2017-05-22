@@ -10,9 +10,9 @@ import com.vk.sdk.api.model.VKList;
 
 public abstract class MyRecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
-    LinearLayoutManager layoutManager;
-    int mLoadCount = 0;
-    VKList<VKApiComment> mItems;
+    private LinearLayoutManager layoutManager;
+    private int mLoadCount = 0;
+    private VKList<VKApiComment> mItems;
 
 
     public MyRecyclerViewScrollListener(LinearLayoutManager layoutManager, VKList<VKApiComment> items) {

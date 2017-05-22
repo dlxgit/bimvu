@@ -9,8 +9,8 @@ import com.vk.sdk.api.model.VKList;
 
 public class SaveAsyncTask extends AsyncTask<Void, Void, Void> {
 
-    VkData mData;
-    Context mContext;
+    private VkData mData;
+    private Context mContext;
 
     public SaveAsyncTask(VkData data, Context context) {
         this.mData = data;
