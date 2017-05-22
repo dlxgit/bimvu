@@ -9,12 +9,12 @@ import com.vk.sdk.api.model.VKList;
 public class VkData {
     private int mTotalItemCount;
     private VKList<VKApiComment> mComments;
-    private int firstOffset;
+    private int mFirstOffset;
 
     public VkData() {
         this.mComments = new VKList<>();
         this.mTotalItemCount = 0;
-        this.firstOffset = 0;
+        this.mFirstOffset = 0;
     }
 
     public VkData(int mTotalItemCount, VKList<VKApiComment> mComments) {
@@ -25,19 +25,19 @@ public class VkData {
     public VkData(int mTotalItemCount, VKList<VKApiComment> mComments, int firstOffset) {
         this.mTotalItemCount = mTotalItemCount;
         this.mComments = mComments;
-        this.firstOffset = firstOffset;
+        this.mFirstOffset = firstOffset;
     }
 
     public String toJsonString() {
         return new Gson().toJson(this, new TypeToken<VkData>(){}.getType());
     }
 
-    public int getFirstOffset() {
-        return firstOffset;
+    public int getmFirstOffset() {
+        return mFirstOffset;
     }
 
-    public void setFirstOffset(int firstOffset) {
-        this.firstOffset = firstOffset;
+    public void setmFirstOffset(int mFirstOffset) {
+        this.mFirstOffset = mFirstOffset;
     }
 
     public void setTotalItemCount(int mTotalItemCount) {

@@ -24,16 +24,34 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     MyRecyclerViewAdapter mAdapter;
     VkData mData;
     int mLastOffset = 0;
-    boolean isFirstLoad = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent intent = getIntent();
+        System.out.println("OnCreate() intent");
+        if(intent != null) {
+            System.out.println("not_null");
+            String jsonComments = intent.getStringExtra("newData");
+            System.out.println("json = " + jsonComments);
+            
+        }
+
+
+
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        //mData = DataManager.loadData(getApplicationContext());
-        mData = new VkData();
+        mData = DataManager.loadData(getApplicationContext());
+        if(mData.getmComments().isEmpty()) {
+            startLoadingComments();
+        }
+        else {
+            restartService(mData.getmFirstOffset());
+        }
+
+        //mData = new VkData();
+
         //DataManager.saveData(mData, this);
 
         mAdapter = new MyRecyclerViewAdapter(mData.getmComments());
@@ -50,16 +68,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         //catch intent and:
         /*
-          if(data.getFirstOffset() > mData.getFirstOffset()) {
-             mData.setFirstOffset(data.getFirstOffset());
-             restartService(mData.getFirstOffset());
+          if(data.getmFirstOffset() > mData.getmFirstOffset()) {
+             mData.setmFirstOffset(data.getmFirstOffset());
+             restartService(mData.getmFirstOffset());
 
 
              //modify lastOffset
          }
          */
-
-        startLoadingComments(); //loading
+        //restartService(mData.getmFirstOffset());
+        //startLoadingComments(); //loading
     }
 
     @Override
@@ -100,27 +118,29 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<VkData> loader, VkData data) {
-        if(isFirstLoad) {
-            isFirstLoad = !isFirstLoad;
-            mData.setTotalItemCount(data.getmTotalItemCount());
-            startLoadingComments();
+        boolean isFirstLoad = false;
+        if(mData.getmFirstOffset() < data.getmFirstOffset()) { //if new elements are at top
+            isFirstLoad = true;
         }
-        else {
-            VKList<VKApiComment> currentComments = mData.getmComments();
-            VKList<VKApiComment> newComments = data.getmComments();
-            Collections.reverse(newComments);
 
-            System.out.println("LOADED_ITEMS: " + data.getmComments().size());
-            System.out.println("OLD");
+        VKList<VKApiComment> currentComments = mData.getmComments();
+        VKList<VKApiComment> newComments = data.getmComments();
+        Collections.reverse(newComments);
+        mData.setTotalItemCount(data.getmTotalItemCount());
+        mData.setmFirstOffset(data.getmFirstOffset());
 
-            //currentComments.addAll(0, newComments);
-            currentComments.addAll(newComments);
-//            if(data.getFirstOffset() > mData.getFirstOffset()) {
-//                mData.setFirstOffset(data.getFirstOffset());
-//                restartService(mData.getFirstOffset());
+        System.out.println("LOADED_ITEMS: " + data.getmComments().size() + " newTotal: " + data.getmTotalItemCount());
+
+        //currentComments.addAll(0, newComments);
+        currentComments.addAll(newComments);
+//            if(data.getmFirstOffset() > mData.getmFirstOffset()) {
+//                mData.setmFirstOffset(data.getmFirstOffset());
+//                restartService(mData.getmFirstOffset());
 //            }
-            //mData.setFirstOffset(data.getFirstOffset());
-            mAdapter.notifyDataSetChanged();
+        //mData.setmFirstOffset(data.getmFirstOffset());
+        mAdapter.notifyDataSetChanged();
+        if(isFirstLoad) {
+            restartService(mData.getmFirstOffset());
         }
     }
 
@@ -130,18 +150,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void startLoadingComments() {
         Bundle args = new Bundle();
         args.putInt("itemCount", VkUtils.REQUEST_COMMENTS_COUNT);
-        if(isFirstLoad) {
-            args.putInt("offset", 0);
-        }
-        else {
 
-            args.putInt("offset", mData.getmTotalItemCount() - mData.getmComments().size() - VkUtils.REQUEST_COMMENTS_COUNT);
+        int requestedOffset = mData.getmTotalItemCount() - mData.getmComments().size() - VkUtils.REQUEST_COMMENTS_COUNT;
+        if(requestedOffset < 0) {
+            requestedOffset = 0;
         }
+
+        System.out.println("requestedOffset = " + requestedOffset);
+
+        args.putInt("offset", requestedOffset);
         Loader<VkData> loader = getSupportLoaderManager().restartLoader(1, args, this);
         loader.forceLoad();
     }
 
     private void restartService(int newOffset) {
+        System.out.println("Restarting service with newoffset: " + newOffset);
         Intent intent = new Intent(this, MyService.class);
         intent.putExtra("firstOffset", newOffset);
         startService(intent);

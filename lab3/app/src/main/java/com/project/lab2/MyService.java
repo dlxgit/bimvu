@@ -1,7 +1,6 @@
 package com.project.lab2;
 
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,21 +9,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Parcel;
-import android.os.RemoteException;
-import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.vk.sdk.api.model.VKApiComment;
-import com.vk.sdk.api.model.VKList;
-import com.vk.sdk.util.VKUtil;
 
-import java.io.FileDescriptor;
+import java.util.Collection;
+import java.util.Collections;
 
 public class MyService extends Service {
 
@@ -39,10 +32,11 @@ public class MyService extends Service {
     private static final int NOTIFICATION_ID = 234;
 
     private Handler mHandler;
-    int firstItemOffset;
+    VkData mCollectedData;
 
     public MyService() {
         super();
+        mCollectedData = new VkData();
     }
 
 
@@ -54,26 +48,32 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        System.out.println("Service is active!");
+        System.out.println("onStartCommand()");
         if(intent == null) {
             System.out.println("Service [null]");
             return START_NOT_STICKY;
         }
-
-        firstItemOffset = intent.getIntExtra("firstOffset", 0);
+        mCollectedData.setmFirstOffset(intent.getIntExtra("firstOffset", 0));
 
         final int delay = 5000; //milliseconds
         mHandler.postDelayed(new Runnable(){
             public void run(){
-                VkData newData = VkUtils.loadComments(firstItemOffset, VkUtils.REQUEST_COMMENTS_COUNT);
-                int newFirstOffset = newData.getFirstOffset();
+                VkData newData = VkUtils.loadComments(mCollectedData.getmFirstOffset() + 1, VkUtils.REQUEST_COMMENTS_COUNT);
+                System.out.println("Tick.");
+                if(!newData.getmComments().isEmpty()) {
+                    System.out.println("successful(" + newData.getmFirstOffset() + ")");
+                    Collections.reverse(newData.getmComments());
+                    mCollectedData.getmComments().addAll(0, newData.getmComments());
+                    mCollectedData.setTotalItemCount(newData.getmTotalItemCount());
+                    mCollectedData.setmFirstOffset(newData.getmFirstOffset());
 
-                System.out.println("[service] offset:" + String.valueOf(firstItemOffset) + "/" + String.valueOf(newFirstOffset));
-
-                if(firstItemOffset < newFirstOffset) {
                     System.out.println("Need to add some!");
-                    send(newData);
+                    sendCollectedData();
+                } else {
+                    System.out.println("bad");
                 }
+
+                System.out.println("[service] offset:" + String.valueOf(mCollectedData.getmFirstOffset()) + "/" + String.valueOf(newData.getmFirstOffset()));
                 mHandler.postDelayed(this, delay);
             }
         }, delay);
@@ -88,18 +88,29 @@ public class MyService extends Service {
     }
 
 
-    private void send(VkData data) {
-        int newFirstOffset = data.getFirstOffset();
-        System.out.println("Sending new offset: " + newFirstOffset);
+    private void debugPrintLst() {
+        System.out.println("_____");
+        for(VKApiComment com : mCollectedData.getmComments()) {
+            System.out.println(com.text);
+        }
+        System.out.println("_____");
+    }
+
+    private void sendCollectedData() {
+        int newFirstOffset = mCollectedData.getmFirstOffset();
+        System.out.println("COLLECTED: " + newFirstOffset);
+        debugPrintLst();
+
         Intent mainActivityIntent = new Intent(MyService.this, MainActivity.class);
 
 
-        mainActivityIntent.putExtra("newData", data.toJsonString());
+        mainActivityIntent.putExtra("newData", mCollectedData.toJsonString());
 
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(MyService.this)
                                                             .addParentStack(MainActivity.class)
                                                             .addNextIntent(mainActivityIntent);
 
+        //Intent.FLAG_ACTIVITY_NEW_TASK |Intent.FLAG_ACTIVITY_SINGLE_TOP
         PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_CANCEL_CURRENT);
 
         Notification mNotification =
@@ -115,7 +126,7 @@ public class MyService extends Service {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, mNotification);
-        this.firstItemOffset = newFirstOffset;
+        //this.firstItemOffset = newFirstOffset;
     }
 
     @Override

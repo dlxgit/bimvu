@@ -29,14 +29,21 @@ public class VkUtils {
                 super.onComplete(response);
                 VkData res = deserializeList(response);
                 result.setTotalItemCount(res.getmTotalItemCount());
-                result.setComments(res.getmComments());
-                result.setFirstOffset(res.getFirstOffset());
-                //result.setFirstOffset(isLoadingMostRecent ? res.getFirstOffset() : res.getFirstOffset() + res.getmComments().size());
+                if(offset == 0) {
+                    result.setComments(new VKList<VKApiComment>());
+                    result.setmFirstOffset(0);
+                }
+                else {
+                    result.setComments(res.getmComments());
+                    result.setmFirstOffset(res.getmFirstOffset());
+                }
+                //result.setmFirstOffset(isLoadingMostRecent ? res.getmFirstOffset() : res.getmFirstOffset() + res.getmComments().size());
             }
 
             @Override
             public void onError(VKError error) {
                 super.onError(error);
+                System.out.println("ONERROR()");
             }
         });
 
