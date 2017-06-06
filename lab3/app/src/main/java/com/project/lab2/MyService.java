@@ -19,14 +19,6 @@ import com.vk.sdk.api.model.VKApiComment;
 import java.util.Collections;
 
 public class MyService extends Service {
-
-    public class LocalBinder extends Binder {
-        MyService getService() {
-            // Return this instance of LocalService so clients can call public methods
-            return MyService.this;
-        }
-    }
-
     private static final int NOTIFICATION_ID = 234;
 
     private Handler mHandler;
@@ -48,11 +40,10 @@ public class MyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mIntent = intent;
-        System.out.println("onStartCommand()");
         if(intent == null) {
-            System.out.println("Service [null]");
-            return START_NOT_STICKY;
+            return START_STICKY;
         }
+
         mCollectedData.setFirstOffset(intent.getIntExtra("firstOffset", 0));
 
         final int delay = 5000; //milliseconds
@@ -88,29 +79,16 @@ public class MyService extends Service {
     }
 
 
-    private void debugPrintLst() {
-        System.out.println("_____");
-        for(VKApiComment com : mCollectedData.getmComments()) {
-            System.out.println(com.text);
-        }
-        System.out.println("_____");
-    }
-
     private void sendCollectedData() {
         int newFirstOffset = mCollectedData.getFirstOffset();
-        System.out.println("COLLECTED: " + newFirstOffset);
-        debugPrintLst();
+        System.out.println("Collected: " + newFirstOffset);
 
         Intent mainActivityIntent = new Intent(MyService.this, MainActivity.class);
-
-
         mainActivityIntent.putExtra("newData", mCollectedData.toJsonString());
-
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(MyService.this)
                                                             .addParentStack(MainActivity.class)
                                                             .addNextIntent(mainActivityIntent);
 
-        //Intent.FLAG_ACTIVITY_NEW_TASK |Intent.FLAG_ACTIVITY_SINGLE_TOP
         PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_CANCEL_CURRENT);
 
         Notification mNotification =
@@ -122,19 +100,13 @@ public class MyService extends Service {
                         .setAutoCancel(true)
                         .build();
 
-        //mNotification.flags |= Notification.FLAG_AUTO_CANCEL;
-
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, mNotification);
-        //this.firstItemOffset = newFirstOffset;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         System.out.println("Service destroy");
-        if(mIntent != null) {
-            //startService(mIntent);
-        }
     }
 }

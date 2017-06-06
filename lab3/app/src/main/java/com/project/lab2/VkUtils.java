@@ -37,13 +37,11 @@ public class VkUtils {
                     result.setComments(res.getmComments());
                     result.setFirstOffset(res.getFirstOffset());
                 }
-                //result.setFirstOffset(isLoadingMostRecent ? res.getFirstOffset() : res.getFirstOffset() + res.getmComments().size());
             }
 
             @Override
             public void onError(VKError error) {
                 super.onError(error);
-                System.out.println("ONERROR()");
             }
         });
 
@@ -68,7 +66,6 @@ public class VkUtils {
         try {
             JSONArray commentsArray = response.json.getJSONObject("response").getJSONArray("items");
             commentsCount = response.json.getJSONObject("response").getInt("count");
-            //commentsCount = gson.fromJson(response.json.getJSONObject("response").getJSONObject("count").toString(), int.class);
 
             for (int i = 0; i < commentsArray.length(); ++i) {
                 JSONObject currentJsonComment = (JSONObject) commentsArray.get(i);
@@ -83,9 +80,7 @@ public class VkUtils {
         }
 
         int offset = (int) response.request.getMethodParameters().get(VKApiConst.OFFSET);
-        //if(isLoadingMostRecent) {
-            offset += result.size() - 1;
-        //}
+        offset += result.size() - 1;
 
         return new VkData(commentsCount, result, offset);
     }

@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
 
         mData = DataManager.loadData(getApplicationContext());
-        //mData = new VkData();
         handleServiceIntent();
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
@@ -41,10 +40,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         else {
             restartService(mData.getFirstOffset());
         }
-
-        //mData = new VkData();
-
-        //DataManager.saveData(mData, this);
 
         mAdapter = new MyRecyclerViewAdapter(mData.getmComments());
         mRecyclerView.setAdapter(mAdapter);
@@ -61,32 +56,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-
         if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
             @Override
-            public void onResult(VKAccessToken res) {
-                // User passed Authorization
-                System.out.println("onActivityResult()");
-            }
-
+            public void onResult(VKAccessToken res) {}
             @Override
-            public void onError(VKError error) {
-                // User didn't pass Authorization
-                System.out.println("onActivityResulterr()");
-            }
-        }))
-        {
-            super.onActivityResult(requestCode, resultCode, data);
-            System.out.println("onActivityResultt()");
-        }
+            public void onError(VKError error) {}
+        })){}
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         DataManager.saveDataInBackground(mData, getApplicationContext());
-        //DataManager.saveData(mData, getApplicationContext());
     }
 
     @Override
@@ -102,23 +83,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if(mData.getFirstOffset() < data.getFirstOffset() || data.getmComments().isEmpty()) { //if new elements are at top
             isFirstLoad = true;
         }
-
         VKList<VKApiComment> currentComments = mData.getmComments();
         VKList<VKApiComment> newComments = data.getmComments();
         Collections.reverse(newComments);
+
         mData.setTotalItemCount(data.getTotalItemCount());
         mData.setFirstOffset(data.getFirstOffset());
 
-        System.out.println("LOADED_ITEMS: " + data.getmComments().size() + " newTotal: " + data.getTotalItemCount());
-
-        //currentComments.addAll(0, newComments);
         currentComments.addAll(newComments);
-//            if(data.getFirstOffset() > mData.getFirstOffset()) {
-//                mData.setFirstOffset(data.getFirstOffset());
-//                restartService(mData.getFirstOffset());
-//            }
-        //mData.setFirstOffset(data.getFirstOffset());
         mAdapter.notifyDataSetChanged();
+
         if(isFirstLoad) {
             if(data.getmComments().isEmpty()) {
                 startLoadingComments();
@@ -141,15 +115,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             requestedOffset = 0;
         }
 
-        System.out.println("requestedOffset = " + requestedOffset);
-
         args.putInt("offset", requestedOffset);
         Loader<VkData> loader = getSupportLoaderManager().restartLoader(1, args, this);
         loader.forceLoad();
     }
 
     private void restartService(int newOffset) {
-        System.out.println("Restarting service with newoffset: " + newOffset);
         Intent intent = new Intent(this, MyService.class);
         intent.putExtra("firstOffset", newOffset);
         startService(intent);
@@ -157,10 +128,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void handleServiceIntent() {
         Intent intent = getIntent();
-        System.out.println("OnCreate() intent");
         VkData serviceItems = new VkData();
         if(intent != null) {
-            System.out.println("not_null");
             String jsonComments = intent.getStringExtra("newData");
             if(jsonComments == null) {
                 return;

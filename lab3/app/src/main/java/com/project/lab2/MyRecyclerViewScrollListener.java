@@ -11,7 +11,6 @@ import com.vk.sdk.api.model.VKList;
 public abstract class MyRecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
     private LinearLayoutManager layoutManager;
-    private int mLoadCount = 0;
     private VKList<VKApiComment> mItems;
 
 
@@ -38,7 +37,6 @@ public abstract class MyRecyclerViewScrollListener extends RecyclerView.OnScroll
         if(currentVisible >= mItems.size() - VkUtils.REQUEST_COMMENTS_COUNT) {
             System.out.println("ScrollListener Tick.");
             onLoadItems();
-            ++mLoadCount;
         }
     }
 
