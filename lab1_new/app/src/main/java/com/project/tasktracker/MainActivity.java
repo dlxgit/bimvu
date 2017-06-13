@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new TaskRecyclerViewAdapter(this, onItemEditCallback);
         adapter.setItems(MyApplication.getInstance().getData());
+        recyclerView = (RecyclerView) findViewById(R.id.tasksRecyclerView);
         recyclerView.setAdapter(adapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
